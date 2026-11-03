@@ -1,0 +1,3 @@
+id,what_ai_proposed,what_changed,why_it_mattered,what_i_would_teach
+C1,A 2-week delivery plan derived from the brief text,Replanned to ~1 day in 9 fixed blocks with explicit scope cuts,The real constraint came from the stakeholder (recruiter) and was not in the document,AI plans from the documents you give it. Confirm real constraints with people first and feed them in; a plan that ignores them is confident and wrong
+C2,Pinned dbt-duckdb==1.9.1 from its training knowledge,Re-pinned to versions proven by a clean install,The AI-chosen pin was yanked and dragged in an incompatible dbt-core; CI and reviewers would have failed on first run,Never accept a version pin you have not installed in a clean environment; AI version knowledge is stale by design
