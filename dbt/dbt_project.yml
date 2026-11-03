@@ -1,0 +1,29 @@
+name: cpg_poc
+version: "0.1.0"
+config-version: 2
+profile: cpg_poc
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+vars:
+  landing: "data/raw/landing"          # relative to repo root (run dbt from the root)
+  late_window_days: 14                 # restatement window agreed with Finance (assumption A-05)
+  reporting_currency: "INR"
+
+models:
+  cpg_poc:
+    bronze:
+      +schema: bronze
+      +materialized: view               # schema-on-read over landed files; replayable
+    silver:
+      +schema: silver
+      +materialized: table
+    gold:
+      +schema: gold
+      +materialized: table
+seeds:
+  cpg_poc:
+    +schema: ref

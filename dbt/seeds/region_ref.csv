@@ -1,0 +1,6 @@
+region_code,region_name,country_code,region_manager_role
+NORTH,North India,IN,rm_north
+SOUTH,South India,IN,rm_south
+WEST,West India,IN,rm_west
+EAST,East India,IN,rm_east
+UAE,United Arab Emirates,AE,rm_uae

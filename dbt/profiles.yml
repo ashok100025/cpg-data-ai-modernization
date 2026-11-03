@@ -1,0 +1,7 @@
+cpg_poc:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "data/warehouse/cpg.duckdb"
+      threads: 4

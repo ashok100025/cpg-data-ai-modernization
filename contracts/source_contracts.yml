@@ -1,0 +1,58 @@
+# Inbound data contracts: what each source system promises to land, and what we do when it doesn't.
+# Owner = the team accountable for the source; changes need their sign-off and a version bump.
+# Enforcement in the PoC: bronze reads all columns as text (never breaks on drift), silver types and
+# validates every row and quarantines failures with a reason (slv_sales_quarantine).
+version: 1
+contracts:
+  - name: pos_sales
+    owner: Retail IT (POS platform)
+    landing: data/raw/landing/pos/batch=YYYY-MM/pos_sales.csv
+    cadence: monthly batch in PoC; daily or hourly in production (assumption A-09)
+    business_key: [TXN_ID, LINE_NO]
+    schema:
+      TXN_ID: {type: string, required: true}
+      LINE_NO: {type: integer, required: true}
+      TXN_TS_LOCAL: {type: "timestamp 'YYYY-MM-DD HH:MM:SS'", tz: store local time, required: true}
+      STORE_CODE: {type: string, required: true, references: store_master.store_code}
+      SKU: {type: string, required: true, references: erp_material.material_id}
+      QTY: {type: "positive integer (may be sent as '3.0')", required: true, note: returns are positive with TXN_TYPE=RETURN}
+      UNIT_PRICE: {type: "decimal >= 0", currency: CURRENCY}
+      CURRENCY: {type: ISO-4217, must_equal: store currency}
+      TXN_TYPE: {type: enum, values: [SALE, RETURN]}
+      LOADED_AT: {type: timestamp, meaning: ingestion time; later value wins for the same key}
+    delivery: at-least-once (retries expected; consumers de-duplicate on business key)
+    late_data: accepted up to 14 days after the batch period starts; later goes to restatement (A-05)
+  - name: ecom_orders
+    owner: Digital Commerce
+    landing: data/raw/landing/ecom/batch=YYYY-MM/ecom_orders.csv
+    business_key: [order_id, item_seq]
+    schema:
+      order_id: {type: string, required: true}
+      item_seq: {type: integer, required: true}
+      event_time_utc: {type: "ISO-8601 UTC", required: true}
+      fulfilment_node: {type: string, references: fulfilment_node_xref.fulfilment_node}
+      product_code: {type: "'P-' + 4 digits", maps_to: "SKU-" + digits}
+      quantity: {type: signed integer, note: refunds are negative}
+      price_amount: {type: "decimal >= 0"}
+      price_ccy: {type: ISO-4217}
+      event_type: {type: enum, values: [order, refund]}
+      ingested_at: {type: timestamp}
+      promo_code: {type: string, optional: true, since: "batch 2026-05 (additive change, v1.1)"}
+    delivery: at-least-once; corrections re-send the same key with new values and a later ingested_at
+  - name: erp_material
+    owner: Master Data (ERP)
+    cadence: monthly full extract
+    authoritative_for: [identity, pack_size, launch_date, lifecycle_status, description]
+  - name: pim_product
+    owner: Marketing (PIM)
+    cadence: monthly full extract
+    authoritative_for: [brand_name, category_name]
+    conflict_rule: ERP wins on shared attributes; conflicts published to slv_product_conflicts
+  - name: store_master
+    owner: Sales Operations
+    cadence: monthly full extract
+    authoritative_for: [store_name, region_code, utc_offset_min, currency]
+    history: region changes are tracked as SCD2 (dim_store)
+change_policy:
+  additive (new optional column): allowed without notice; picked up by union_by_name
+  breaking (rename, type change, semantics change): 30 days notice, new contract version, parallel run

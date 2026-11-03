@@ -38,8 +38,53 @@ the caller's access policy before a templated query runs. Anything else is refus
 
 ## Run it
 
-_Filled in as the PoC is built (Blocks 2–4)._ Target: `make all` locally or `docker build . && docker run …`,
-with no cloud account and no API key required.
+Requires Python 3.10+. No cloud account or API key.
+
+```bash
+make setup             # virtualenv + pinned dependencies
+make all               # land synthetic data, build bronze -> silver -> gold, run 52 data tests
+make demo-incremental  # land October: late rows, corrections, bad rows -> incremental run
+```
+
+What the pipeline proves (verified on every run):
+
+| Fault injected at source | How it is handled | Where to see it |
+|---|---|---|
+| Retries (exact re-sends, incl. next batch) | Recognised by content hash, collapsed | `silver.slv_dq_batch_summary.exact_retries_collapsed` |
+| Corrections (same key, new values) | Latest ingested version wins (delete+insert) | `silver.slv_sales` |
+| Corrections / late lines beyond 14 days | Held for Finance restatement, not applied | `silver.slv_sales_quarantine` (`LATE_BEYOND_WINDOW`) |
+| Unknown SKU, negative price, missing store | Quarantined with reason | `silver.slv_sales_quarantine` |
+| Schema drift (new column, `'3.0'` as quantity) | Text-first bronze + typed silver | `brz_ecom_orders`, `slv_sales_conformed` |
+| Store moved region / product reclassified | SCD2; facts join as-was | `gold.dim_store`, `gold.dim_product`, test `assert_store_reassignment_is_as_was` |
+| ERP vs PIM attribute conflict | ERP wins; conflict published | `silver.slv_product_conflicts` |
+
+Incremental and full rebuild produce identical facts (same rows, units, revenue and content hash).
+
+### Explore the results
+
+Everything is built locally in one DuckDB file, **`data/warehouse/cpg.duckdb`** (schemas `ref`, `bronze`,
+`silver`, `gold`). DuckDB is serverless and is installed by `make setup` – nothing else is needed.
+
+```bash
+make inspect                          # every schema/table with row counts, reconciliation, quarantine by reason
+make preview TABLE=gold.dim_store     # first 20 rows of any table or view (ROWS=50 for more)
+make query SQL="select region_code_at_sale, sum(net_sales_inr) as net_inr from gold.fct_sales_line group by 1"
+```
+
+All three are read-only and need no extra install.
+
+Optional – browse it in a SQL workbench (needs the DuckDB CLI, e.g. `brew install duckdb`), from the repo root:
+
+```bash
+duckdb -ui data/warehouse/cpg.duckdb
+```
+
+Run from the repo root: bronze views read the landed CSVs via a relative path.
+
+Using **DBeaver** instead: New Database Connection → DuckDB → path `data/warehouse/cpg.duckdb`, tick
+*Read-only connection* (so `make` can rebuild while it is open), and add the bootstrap query
+`SET file_search_path = '<absolute path to this repo>';` so bronze views resolve their CSV paths. If you
+get a storage-version error, update the DuckDB driver in Driver Manager (the file is built with DuckDB 1.5.6).
 
 ## Technology summary
 

@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: fct_sales_line
+    description: >
+      Sales fact at the grain of one source sales/return line event. Signed quantities; amounts in INR.
+      Contract-enforced: a change to names or types fails the build (see docs/delivery/cicd.md).
+    config:
+      contract: {enforced: true}
+    columns:
+      - name: sales_line_key
+        data_type: varchar
+        description: md5(source_system | source_txn_id | source_line_no) - the business key
+        data_tests: [unique, not_null]
+      - {name: date_key, data_type: integer, data_tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: event_date_local, data_type: date, data_tests: [not_null]}
+      - {name: event_ts_utc, data_type: timestamp}
+      - {name: store_sk, data_type: varchar, data_tests: [not_null, {relationships: {arguments: {to: ref('dim_store'), field: store_sk}}}]}
+      - {name: store_code, data_type: varchar}
+      - {name: region_code_at_sale, data_type: varchar, description: region the store belonged to on the sale date (as-was)}
+      - {name: product_sk, data_type: varchar, data_tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_sk}}}]}
+      - {name: sku, data_type: varchar}
+      - {name: source_system, data_type: varchar, data_tests: [{accepted_values: {arguments: {values: ['POS', 'ECOM']}}}]}
+      - {name: source_txn_id, data_type: varchar}
+      - {name: source_line_no, data_type: integer}
+      - {name: channel, data_type: varchar, data_tests: [{accepted_values: {arguments: {values: ['STORE', 'ECOM']}}}]}
+      - {name: txn_type, data_type: varchar, data_tests: [{accepted_values: {arguments: {values: ['SALE', 'RETURN']}}}]}
+      - {name: qty, data_type: integer, data_tests: [not_null]}
+      - {name: units_sold, data_type: integer}
+      - {name: units_returned, data_type: integer}
+      - {name: unit_price_local, data_type: "decimal(12,2)"}
+      - {name: currency_code, data_type: varchar}
+      - {name: fx_rate_to_inr, data_type: double, data_tests: [not_null]}
+      - {name: gross_sales_inr, data_type: "decimal(14,2)"}
+      - {name: returns_inr, data_type: "decimal(14,2)"}
+      - {name: net_sales_inr, data_type: "decimal(14,2)"}
+      - {name: promo_id, data_type: varchar}
+      - {name: on_promotion, data_type: boolean}
+      - {name: is_late_arrival, data_type: boolean}
+      - {name: ingested_at, data_type: timestamp}
+      - {name: batch_id, data_type: varchar}
+
+  - name: dim_product
+    description: Product SCD2. One current row per SKU.
+    columns:
+      - {name: product_sk, data_tests: [unique, not_null]}
+      - {name: sku, data_tests: [not_null]}
+  - name: dim_store
+    description: Store SCD2 including region assignment.
+    columns:
+      - {name: store_sk, data_tests: [unique, not_null]}
+      - {name: region_code, data_tests: [not_null, {relationships: {arguments: {to: ref('dim_region'), field: region_code}}}]}
+  - name: dim_date
+    columns:
+      - {name: date_key, data_tests: [unique, not_null]}

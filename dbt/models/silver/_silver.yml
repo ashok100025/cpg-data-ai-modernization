@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: slv_sales
+    columns:
+      - {name: sales_line_key, data_tests: [unique, not_null]}
+  - name: slv_sales_quarantine
+    columns:
+      - name: dq_reason
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [MISSING_STORE, UNKNOWN_SKU, INVALID_PRICE, INVALID_QTY, INVALID_TIMESTAMP, CURRENCY_MISMATCH, LATE_BEYOND_WINDOW]

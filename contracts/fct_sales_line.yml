@@ -1,0 +1,16 @@
+# Outbound (consumer) contract for the curated sales fact. Enforced at build time by the
+# dbt model contract in dbt/models/gold/_gold.yml - a breaking change fails CI.
+name: gold.fct_sales_line
+version: 1.0.0
+owner: Data Platform pod (Engineer A)      # see docs/delivery/pod_plan.md
+grain: one source sales or return line event
+business_key: sales_line_key = md5(source_system | source_txn_id | source_line_no)
+measures_defined_in: metrics/metrics.yml     # consumers must not re-derive revenue
+semantics:
+  qty: signed; returns are negative
+  amounts: INR at monthly average FX rate; tax excluded (assumption A-01)
+  region_code_at_sale: region at time of sale (as-was); use dim_store.is_current for as-is
+freshness: available by 06:00 local after each batch (production target)
+quality_guarantees: [unique business key, no orphan dimension keys, reconciles to validated silver]
+consumers: [BI / reporting, revenue forecast, AI insight service]
+change_policy: semver; breaking changes -> new major version published alongside the old for one release
