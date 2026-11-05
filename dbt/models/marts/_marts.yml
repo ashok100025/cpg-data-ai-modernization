@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: mart_sales_weekly
+    description: >
+      Weekly sales by region (as-was), category (as-was) and channel. Every column is produced by the
+      metric compiler from metrics/metrics.yml. Grain: week x region x category x channel.
+    data_tests:
+      - unique_mart_grain
+    columns:
+      - {name: week, data_tests: [not_null]}
+      - {name: region, data_tests: [not_null]}
+      - {name: category, data_tests: [not_null]}
+      - {name: channel, data_tests: [not_null]}
+
+exposures:
+  - name: revenue_forecast
+    type: ml
+    maturity: low
+    owner: {name: Data Platform pod - Engineer B, email: pod@example.com}
+    description: Weekly net revenue / net units forecast (src/poc/forecast.py). Reads metrics via the compiler.
+    depends_on: [ref('fct_sales_line'), ref('dim_store'), ref('dim_product'), ref('dim_date')]
+  - name: ai_insight_assistant
+    type: application
+    maturity: low
+    owner: {name: Data Platform pod - Engineer C, email: pod@example.com}
+    description: Governed question answering over approved metrics only (Block 4).
+    depends_on: [ref('fct_sales_line'), ref('dim_store'), ref('dim_product'), ref('dim_date')]
+  - name: sales_reporting
+    type: dashboard
+    maturity: medium
+    owner: {name: Commercial Analytics, email: analytics@example.com}
+    description: Regional and category sales reporting reads the weekly mart.
+    depends_on: [ref('mart_sales_weekly')]

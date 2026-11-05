@@ -1,0 +1,111 @@
+# The metric catalogue - the ONE place where business measures are defined.
+# Every consumer (weekly mart, forecast, AI assistant) gets SQL for these metrics only through
+# src/poc/metrics.py. Nobody re-writes "revenue" in their own query.
+# Production equivalent: Unity Catalog metric views (or the dbt Semantic Layer on Snowflake).
+version: 1
+
+source:
+  fact: gold.fct_sales_line        # alias f; grain = one sale or return line
+  joins:                           # dimensions pull in a join only when they need it
+    date:          {table: gold.dim_date,    condition: "f.date_key = date.date_key"}
+    product:       {table: gold.dim_product, condition: "f.product_sk = product.product_sk"}
+    product_now:   {table: gold.dim_product, condition: "f.sku = product_now.sku and product_now.is_current"}
+    store_now:     {table: gold.dim_store,   condition: "f.store_code = store_now.store_code and store_now.is_current"}
+  date_column: f.event_date_local  # used for date-range filters
+
+dimensions:
+  week:           {expr: date.week_start,      join: date,        description: Week starting Monday}
+  month:          {expr: date.month_start,     join: date,        description: Calendar month}
+  fiscal_year:    {expr: date.fiscal_year,     join: date,        description: "Fiscal year (April start, 4-4-5)"}
+  fiscal_period:  {expr: date.fiscal_period,   join: date,        description: Fiscal period 1-12}
+  region:         {expr: f.region_code_at_sale,                   description: "Region AS-WAS - region of the store on the sale date (reporting default, A-02)"}
+  region_as_is:   {expr: store_now.region_code, join: store_now,  description: "Region AS-IS - store's current region (planning and forecasting)"}
+  category:       {expr: product.category_name, join: product,    description: "Category AS-WAS - category on the sale date"}
+  category_as_is: {expr: product_now.category_name, join: product_now, description: "Category AS-IS - product's current category"}
+  brand:          {expr: product.brand_name,   join: product,     description: Brand}
+  channel:        {expr: f.channel,                               description: "STORE or ECOM"}
+  store:          {expr: f.store_code,                            description: Store code}
+  sku:            {expr: f.sku,                                   description: Product code}
+
+metrics:
+  gross_sales:
+    description: Value of goods sold, before returns. INR, tax excluded (A-01), monthly average FX (A-06).
+    expr: sum(f.gross_sales_inr)
+    unit: INR
+    owner: Finance
+    sensitivity: internal
+    certified: true
+  returns_value:
+    description: Value of goods returned or refunded. INR.
+    expr: sum(f.returns_inr)
+    unit: INR
+    owner: Finance
+    sensitivity: internal
+    certified: true
+  net_revenue:
+    description: Gross sales minus returns. THE revenue measure for all reporting. INR, tax excluded.
+    expr: sum(f.net_sales_inr)
+    unit: INR
+    owner: Finance
+    sensitivity: internal
+    certified: true
+  units_sold:
+    description: Units sold (returns excluded).
+    expr: sum(f.units_sold)
+    unit: units
+    owner: Supply Chain
+    sensitivity: internal
+    certified: true
+  units_returned:
+    description: Units returned.
+    expr: sum(f.units_returned)
+    unit: units
+    owner: Supply Chain
+    sensitivity: internal
+    certified: true
+  net_units:
+    description: >
+      Units sold minus units returned. THE demand measure (A-10). It is observed demand: lost sales
+      from stock-outs are not visible because inventory is not ingested.
+    expr: sum(f.qty)
+    unit: units
+    owner: Supply Chain
+    sensitivity: internal
+    certified: true
+  return_rate:
+    description: Returns value as a share of gross sales.
+    type: ratio
+    numerator: returns_value
+    denominator: gross_sales
+    unit: ratio
+    owner: Finance
+    sensitivity: internal
+    certified: true
+  avg_selling_price:
+    description: Net revenue per net unit - realised price after promotions. Pricing is commercially sensitive.
+    type: ratio
+    numerator: net_revenue
+    denominator: net_units
+    unit: INR per unit
+    owner: Commercial
+    sensitivity: commercially_sensitive
+    certified: true
+  promo_revenue:
+    description: Net revenue from lines sold on a promotion.
+    expr: sum(case when f.on_promotion then f.net_sales_inr else 0 end)
+    unit: INR
+    owner: Trade Marketing
+    sensitivity: commercially_sensitive
+    certified: true
+  promo_revenue_share:
+    description: Share of net revenue sold on promotion - shows promotion dependency.
+    type: ratio
+    numerator: promo_revenue
+    denominator: net_revenue
+    unit: ratio
+    owner: Trade Marketing
+    sensitivity: commercially_sensitive
+    certified: true
+
+# Sensitivity levels, lowest to highest. Who may see which level is enforced in Block 4 (access policy).
+sensitivity_levels: [internal, commercially_sensitive]

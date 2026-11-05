@@ -35,6 +35,8 @@ the caller's access policy before a templated query runs. Anything else is refus
 | `src/poc/` | Synthetic data generator, forecast, governed AI insight |
 | `tests/` | Automated tests run in CI |
 | `methodology/` | Time log, decision log, coaching moments → methodology spreadsheet |
+| `docs/corrections_register.md` | Every problem found in AI output, how it was found, who spotted it, the fix |
+| `docs/explanations/` | Block-by-block walkthroughs and glossary |
 
 ## Run it
 
@@ -42,8 +44,9 @@ Requires Python 3.10+. No cloud account or API key.
 
 ```bash
 make setup             # virtualenv + pinned dependencies
-make all               # land synthetic data, build bronze -> silver -> gold, run 52 data tests
-make demo-incremental  # land October: late rows, corrections, bad rows -> incremental run
+make all               # land data, build bronze -> silver -> gold -> marts, forecast, run all tests
+make demo-incremental  # land October: late rows, corrections, bad rows -> incremental run + re-forecast
+make test              # 26 Python tests: metric compiler, forecast, leakage guards
 ```
 
 What the pipeline proves (verified on every run):
@@ -60,6 +63,33 @@ What the pipeline proves (verified on every run):
 
 Incremental and full rebuild produce identical facts (same rows, units, revenue and content hash).
 
+### Metrics and forecast (Block 3)
+
+**One definition per measure.** `metrics/metrics.yml` defines every measure once (net revenue, net units
+= demand, return rate, average selling price, promotion share …) with owner, unit and sensitivity.
+`src/poc/metrics.py` is the only code that turns metric names into SQL; the weekly mart, the forecast
+and the AI assistant all go through it. Unknown metrics, dimensions or filters are refused; filter
+values are bound parameters.
+
+**Forecast.** `make forecast` (part of `make all`): weekly net revenue and net units per category ×
+region, 8 weeks ahead, using **as-is** region/category (future sales happen in today's structure;
+reporting stays as-was). Two explainable models, chosen by a rolling-origin backtest:
+
+| Measure | Model | Backtest WAPE | Bias | Value added vs baseline |
+|---|---|---|---|---|
+| net_revenue | seasonal naive × recent trend (**selected**) | 14.5% | +3.4% | +22.5% |
+| net_revenue | seasonal naive (baseline) | 18.8% | −15.4% | – |
+| net_units | seasonal naive × recent trend (**selected**) | 12.6% | +2.3% | +30.3% |
+| net_units | seasonal naive (baseline) | 18.1% | −15.9% | – |
+
+Every forecast row carries a **confidence** label from its own series' backtest error (19 high, 4 medium,
+2 low – the single-product *Healthy Snacks* category). Leakage is tested: a deliberately leaked
+backtest fails `make test`. Tables: `gold.mart_sales_weekly`, `gold.forecast_weekly`,
+`gold.forecast_accuracy`, `gold.forecast_series_accuracy`, `gold.forecast_backtest`.
+
+Limitations: demand is *observed* demand (no inventory, so stock-outs are invisible); moving holidays
+(e.g. Diwali) are not modelled; production would forecast as-of ingestion time, not event time.
+
 ### Explore the results
 
 Everything is built locally in one DuckDB file, **`data/warehouse/cpg.duckdb`** (schemas `ref`, `bronze`,
@@ -69,6 +99,7 @@ Everything is built locally in one DuckDB file, **`data/warehouse/cpg.duckdb`** 
 make inspect                          # every schema/table with row counts, reconciliation, quarantine by reason
 make preview TABLE=gold.dim_store     # first 20 rows of any table or view (ROWS=50 for more)
 make query SQL="select region_code_at_sale, sum(net_sales_inr) as net_inr from gold.fct_sales_line group by 1"
+make sql METRICS=net_revenue,return_rate BY=region,week   # the SQL the metric compiler generates
 ```
 
 All three are read-only and need no extra install.
