@@ -1,0 +1,9 @@
+version: 2
+
+seeds:
+  - name: region_ref
+    description: Reference data we own - regions, country, regional-manager role (maps to the access policy).
+  - name: fulfilment_node_xref
+    description: E-commerce fulfilment node -> store attribution (assumption A-07).
+  - name: fx_rates_monthly
+    description: Monthly average FX rate to INR per currency (assumption A-06). Production - from Treasury / ERP.

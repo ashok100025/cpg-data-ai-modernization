@@ -9,7 +9,6 @@ test-paths: ["tests"]
 macro-paths: ["macros"]
 
 vars:
-  landing: "data/raw/landing"          # relative to repo root (run dbt from the root)
   late_window_days: 14                 # restatement window agreed with Finance (assumption A-05)
   reporting_currency: "INR"
 

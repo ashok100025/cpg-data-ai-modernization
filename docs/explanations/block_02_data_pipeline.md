@@ -180,6 +180,10 @@ allowed values for channel, txn_type, source_system, dq_reason.
 
 ---
 
+> **Updated in Block 4:** bronze models now read the landing files through dbt **sources**
+> (`dbt/models/bronze/_sources.yml`) instead of hard-coded `read_csv` paths, and every model has a
+> description – see `block_04_ai_docker_ci.md`. Results are identical.
+
 ## Verification results (02:20 IST)
 
 | Check | Expected | Result |

@@ -1,13 +1,38 @@
 version: 2
+
 models:
+  - name: slv_store_history
+    description: Silver - typed store reference, one row per store per monthly extract. Input to dim_store (SCD2).
+  - name: slv_product_history
+    description: >
+      Silver - ERP and PIM extracts joined per SKU and extract month with survivorship rules (ERP owns identity,
+      pack size, launch date, status; PIM owns brand and category) and a pack-size conflict flag.
+  - name: slv_product_conflicts
+    description: Silver - work queue for Master Data - ERP vs PIM disagreements in the latest extract.
+  - name: slv_sales_conformed
+    description: >
+      Silver, incremental append - both sales sources conformed to one contract (UTC + local date, signed
+      quantity, SKU-codes), one row per landed line with dq_reason (NULL = valid), is_exact_retry and days_late.
+      Processes only rows ingested after the last run.
   - name: slv_sales
+    description: >
+      Silver, incremental delete+insert - valid, de-duplicated sales lines; one row per business key
+      (source system + transaction id + line). Retries collapse; the latest correction wins.
     columns:
-      - {name: sales_line_key, data_tests: [unique, not_null]}
+      - {name: sales_line_key, description: md5(source_system | source_txn_id | source_line_no), data_tests: [unique, not_null]}
   - name: slv_sales_quarantine
+    description: >
+      Silver - rows that failed a quality rule, with the reason. Never silently dropped; LATE_BEYOND_WINDOW rows
+      go to Finance's restatement process.
     columns:
       - name: dq_reason
+        description: Quality rule that failed.
         data_tests:
           - not_null
           - accepted_values:
               arguments:
                 values: [MISSING_STORE, UNKNOWN_SKU, INVALID_PRICE, INVALID_QTY, INVALID_TIMESTAMP, CURRENCY_MISMATCH, LATE_BEYOND_WINDOW]
+  - name: slv_dq_batch_summary
+    description: >
+      Silver - monitoring signal per batch and source - rows landed, valid, quarantined (by reason), exact retries
+      collapsed, late rows accepted / held, % quarantined. Feeds the anomaly warning test.

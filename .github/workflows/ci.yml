@@ -1,0 +1,53 @@
+# CI for the proof of concept. Every push and pull request must pass before it can be merged.
+# Gates: 61 dbt data tests + the enforced fact contract, 56 Python tests incl. the AI golden-question set,
+# the incremental October run, and the container build + run.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install pinned dependencies
+        run: make setup
+      - name: Build history + data tests + forecast + Python tests
+        run: make all
+      - name: Governed AI demo (answered / restricted / refused)
+        run: make ai-demo
+      - name: Incremental run with late data, corrections and bad rows
+        run: make demo-incremental
+      - name: Tests again after the incremental run
+        run: make test
+      - name: Warehouse summary
+        run: make inspect
+      - name: dbt docs (lineage graph)
+        run: make docs-generate
+      - name: Upload dbt docs and AI audit log
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-docs-and-audit
+          path: |
+            dbt/target/index.html
+            dbt/target/manifest.json
+            dbt/target/catalog.json
+            outputs/audit/insight_audit.jsonl
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t cpg-data-ai-poc .
+      - name: Run the whole PoC in the container
+        run: docker run --rm cpg-data-ai-poc

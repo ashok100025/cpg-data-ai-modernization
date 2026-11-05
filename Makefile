@@ -3,7 +3,7 @@ PY      ?= .venv/bin/python
 DBT     ?= .venv/bin/dbt
 DBTARGS  = --project-dir dbt --profiles-dir dbt
 
-.PHONY: setup data build forecast test demo-incremental inspect preview query sql all clean
+.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run all clean
 
 setup:            ## create the virtualenv and install pinned dependencies
 	python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
@@ -38,6 +38,26 @@ query:            ## any read-only SQL: make query SQL="select ..."
 sql:              ## SQL the metric compiler generates: make sql METRICS=net_revenue,return_rate BY=region,week
 	@test -n "$(METRICS)" || (echo 'usage: make sql METRICS=net_revenue,return_rate [BY=region,week] [WHERE="region=SOUTH"]'; exit 1)
 	@$(PY) -m src.poc.metrics --metrics "$(METRICS)" --by "$(BY)" $(if $(WHERE),--where "$(WHERE)")
+
+ROLE ?= finance_analyst
+ask:              ## governed AI assistant: make ask Q="net revenue by region last quarter" [ROLE=regional_manager_south]
+	@test -n "$(Q)" || (echo 'usage: make ask Q="What was net revenue by region last quarter?" [ROLE=finance_analyst]'; exit 1)
+	@$(PY) -m src.poc.insight.cli --role "$(ROLE)" "$(Q)"
+
+ai-demo:          ## scripted demo: answered, restricted, refused (unauthorized / unsupported / injection)
+	@$(PY) -m src.poc.insight.cli --demo
+
+docs-generate:    ## dbt documentation site incl. lineage graph -> dbt/target/index.html
+	$(DBT) docs generate $(DBTARGS)
+
+docs: docs-generate ## generate and open the dbt docs site on http://localhost:8080
+	$(DBT) docs serve $(DBTARGS) --port 8080
+
+docker-build:     ## build the container image (needs Docker)
+	docker build -t cpg-data-ai-poc .
+
+docker-run:       ## run the whole PoC inside the container
+	docker run --rm cpg-data-ai-poc
 
 all: data build forecast test
 

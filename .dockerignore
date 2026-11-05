@@ -1,0 +1,11 @@
+.git
+.handoff
+.venv
+data/raw/landing
+data/warehouse
+dbt/target
+dbt/logs
+outputs
+**/__pycache__
+.pytest_cache
+.DS_Store

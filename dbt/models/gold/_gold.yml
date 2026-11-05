@@ -41,15 +41,24 @@ models:
       - {name: batch_id, data_type: varchar}
 
   - name: dim_product
-    description: Product SCD2. One current row per SKU.
+    description: >
+      Gold - product dimension, SCD type 2. New version only when brand, category, pack size or lifecycle status
+      changes; valid_from / valid_to from extract dates. One current row per SKU.
     columns:
       - {name: product_sk, data_tests: [unique, not_null]}
       - {name: sku, data_tests: [not_null]}
   - name: dim_store
-    description: Store SCD2 including region assignment.
+    description: >
+      Gold - store dimension, SCD type 2 incl. region. Facts join the version valid on the sale date (as-was);
+      is_current gives as-is.
     columns:
       - {name: store_sk, data_tests: [unique, not_null]}
       - {name: region_code, data_tests: [not_null, {relationships: {arguments: {to: ref('dim_region'), field: region_code}}}]}
   - name: dim_date
+    description: Gold - calendar 2024-2027 with the fiscal calendar (year from the Monday of the week containing 1 April; 13-week quarters split 4-4-5).
     columns:
       - {name: date_key, data_tests: [unique, not_null]}
+  - name: dim_region
+    description: Gold - regions with country and the regional-manager role used by the access policy.
+    columns:
+      - {name: region_code, data_tests: [unique, not_null]}

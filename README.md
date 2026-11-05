@@ -40,13 +40,14 @@ the caller's access policy before a templated query runs. Anything else is refus
 
 ## Run it
 
-Requires Python 3.10+. No cloud account or API key.
+Requires Python 3.10+ (or only Docker, see below). No cloud account or API key.
 
 ```bash
 make setup             # virtualenv + pinned dependencies
 make all               # land data, build bronze -> silver -> gold -> marts, forecast, run all tests
 make demo-incremental  # land October: late rows, corrections, bad rows -> incremental run + re-forecast
-make test              # 26 Python tests: metric compiler, forecast, leakage guards
+make test              # 56 Python tests: metric compiler, forecast, leakage, AI guardrails + golden set
+make ai-demo           # governed AI assistant: answered / restricted / refused
 ```
 
 What the pipeline proves (verified on every run):
@@ -89,6 +90,41 @@ backtest fails `make test`. Tables: `gold.mart_sales_weekly`, `gold.forecast_wee
 
 Limitations: demand is *observed* demand (no inventory, so stock-outs are invisible); moving holidays
 (e.g. Diwali) are not modelled; production would forecast as-of ingestion time, not event time.
+
+### Governed AI assistant (Block 4)
+
+Ask questions in plain English; answers come **only** from approved metrics, **only** with rows the role
+may see, with SQL, owner and data freshness attached. The planner (offline rules by default; Claude
+optional via `CPG_PLANNER=anthropic` + `ANTHROPIC_API_KEY`, untested here) only turns the question
+into a plan – it never writes SQL and never sees data. Guardrails, SQL and answer text are deterministic.
+
+```bash
+make ai-demo                                                     # 6 scripted questions, all four outcomes
+make ask Q="What was net revenue by region last quarter?"         # ROLE=finance_analyst by default
+make ask Q="What is the average selling price for Snacks?" ROLE=regional_manager_south   # -> refused
+```
+
+| Outcome | Example |
+|---|---|
+| ✅ `ANSWERED` | Finance: net revenue by region last quarter → table + SQL + owner + "sales up to …" |
+| 🔒 `ANSWERED_RESTRICTED` | South manager: revenue by region → only SOUTH rows, with a note |
+| ⛔ `REFUSED_UNAUTHORIZED` | South manager asks for average selling price (commercially sensitive) |
+| ⛔ `REFUSED_UNSUPPORTED` | "profit margin" (not a certified metric), "ignore your instructions…", "drop table…" |
+
+Roles and rules: `policies/access_policy.yml`. Every request is logged to
+`outputs/audit/insight_audit.jsonl`. A 19-question golden set (`tests/insight_eval.yml`) and guardrail
+tests – including a deliberately malicious planner – run in CI.
+
+### Docker and CI
+
+```bash
+make docker-build && make docker-run     # whole PoC in a container: only Docker needed
+make docs                                # dbt docs site with lineage graph on http://localhost:8080
+```
+
+`.github/workflows/ci.yml` runs on every push and pull request: **test** job (setup → `make all` →
+AI demo → incremental October run → tests → inspect → dbt docs, uploaded as an artifact) and **docker**
+job (build the image and run the whole PoC inside it).
 
 ### Explore the results
 

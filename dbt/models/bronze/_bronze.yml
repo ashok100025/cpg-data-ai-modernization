@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: brz_pos_sales
+    description: >
+      Bronze - POS lines exactly as landed, every column as text (schema-on-read) so a source type change
+      never breaks loading. Adds _batch (from the folder name) and _source_file for lineage.
+  - name: brz_ecom_orders
+    description: >
+      Bronze - e-commerce lines as landed. union_by_name absorbs additive drift (promo_code from 2026-05;
+      NULL in older batches). Adds _batch and _source_file.
+  - name: brz_erp_material
+    description: Bronze - every monthly ERP material extract, kept so product history (SCD2) can be rebuilt at any time.
+  - name: brz_pim_product
+    description: Bronze - every monthly PIM product extract (brand, category, marketing pack size).
+  - name: brz_store_master
+    description: Bronze - every monthly store-master extract (store to region, time zone, currency).
+  - name: brz_promotions
+    description: Bronze - trade promotion calendar (promotion, SKU, region, dates, discount).

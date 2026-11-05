@@ -1,0 +1,32 @@
+version: 2
+
+# The landing zone, declared as dbt sources so lineage starts at the files each source system
+# delivers (green nodes in the docs graph). dbt-duckdb reads them in place via external_location;
+# in production these are Unity Catalog volumes / Auto Loader streams with the same contracts
+# (contracts/source_contracts.yml).
+sources:
+  - name: landing
+    description: Files landed by source systems, append-only, partitioned by batch or extract date.
+    meta:
+      external_location: "read_csv('data/raw/landing/{name}/*/*.csv', header = true, all_varchar = true, union_by_name = true, filename = true)"
+    tables:
+      - name: pos
+        description: Store POS sales and return lines (schema A, local time, returns as +qty with TXN_TYPE=RETURN). Monthly batches `batch=YYYY-MM`.
+        meta: {owner: Retail IT (POS platform), contract: contracts/source_contracts.yml#pos_sales}
+      - name: ecom
+        description: E-commerce order and refund lines (schema B, UTC, refunds as -qty, P- product codes; promo_code added from 2026-05). Monthly batches.
+        meta: {owner: Digital Commerce, contract: contracts/source_contracts.yml#ecom_orders}
+      - name: erp_product
+        description: ERP material master, monthly full extract. Owns identity, pack size, launch date, lifecycle status.
+        meta: {owner: Master Data (ERP), contract: contracts/source_contracts.yml#erp_material}
+      - name: pim_product
+        description: PIM product master, monthly full extract. Owns brand and category.
+        meta: {owner: Marketing (PIM), contract: contracts/source_contracts.yml#pim_product}
+      - name: store_ref
+        description: Store master, monthly full extract. Owns store name, region, time zone, currency.
+        meta: {owner: Sales Operations, contract: contracts/source_contracts.yml#store_master}
+      - name: promotions
+        description: Trade promotion calendar (single file).
+        meta:
+          owner: Trade Marketing
+          external_location: "read_csv('data/raw/landing/promotions/*.csv', header = true, all_varchar = true, filename = true)"

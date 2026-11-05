@@ -1,0 +1,24 @@
+# Who may see what through the AI assistant (and, in production, any consumer).
+# PoC: the role is passed in. Production: SSO groups (Entra ID) mapped to Unity Catalog groups,
+# with the same rules as UC row filters and column masks / metric-view permissions.
+version: 1
+
+sensitivity_order: [internal, commercially_sensitive]   # must match metrics/metrics.yml
+row_scope_dimension: region                              # region AS-WAS - accountable region at sale time
+
+roles:
+  finance_analyst:
+    description: Finance - all regions, all certified metrics including pricing and promotions
+    regions: ["*"]
+    max_sensitivity: commercially_sensitive
+  sales_analyst:
+    description: Commercial analytics - all regions, no pricing or promotion economics
+    regions: ["*"]
+    max_sensitivity: internal
+  regional_manager_south:
+    description: South region manager - own region only, no pricing or promotion economics
+    regions: [SOUTH]
+    max_sensitivity: internal
+
+limits:
+  max_result_rows: 200          # answers are summaries, not data extracts

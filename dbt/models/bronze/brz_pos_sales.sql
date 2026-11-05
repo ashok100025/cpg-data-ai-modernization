@@ -4,5 +4,4 @@ select
     * exclude (filename),
     regexp_extract(filename, 'batch=([0-9]{4}-[0-9]{2})', 1) as _batch,
     filename                                                 as _source_file
-from read_csv('{{ var("landing") }}/pos/*/*.csv',
-              header = true, all_varchar = true, union_by_name = true, filename = true)
+from {{ source('landing', 'pos') }}
