@@ -1,0 +1,10 @@
+# Decision ownership made enforceable: changes to these paths need review by their owners
+# (docs/delivery/pod_plan.md - decision rights). In the client engagement the handles below become
+# the real teams (e.g. @client/finance-metric-owners); in this PoC every path maps to the candidate.
+*                               @ashok100025
+/metrics/metrics.yml            @ashok100025   # Finance + metric owners approve definitions
+/policies/access_policy.yml     @ashok100025   # Data Governance approves access rules
+/contracts/                     @ashok100025   # source owners / consumers approve contract changes
+/dbt/models/gold/               @ashok100025   # modelling owner; breaking change = contract process
+/docs/adr/                      @ashok100025   # architect
+/.github/workflows/             @ashok100025   # platform owner

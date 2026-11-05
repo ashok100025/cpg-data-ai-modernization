@@ -14,7 +14,7 @@ verifying its own work, inside the review process Ashok set (explain → agree �
 |---|---|
 | **Ashok** | #1, #2, #9, #10 |
 | **AI, from Ashok's question** | #13, #14, #15, #22, #23, #28, #29 |
-| AI self-check | #3–#8, #11, #12, #16–#21, #24–#27, #30–#33 |
+| AI self-check | #3–#8, #11, #12, #16–#21, #24–#27, #30–#34 |
 
 ## Corrections
 
@@ -183,6 +183,11 @@ verifying its own work, inside the review process Ashok set (explain → agree �
 - **Found by:** AI self-check – reading the generated physical schema
 - **Fix:** Descriptions for all 28 columns in `_gold.yml`; schema doc regenerated
 - **Why it mattered:** The fact is the most-read table; blanks look unfinished to a receiving team
+
+### #34 · Block 6 · Methodology workbook miscounted an AI-suggested decision as "changed"
+- **Found by:** AI self-check – opened the generated workbook and checked each computed number against its source
+- **Fix:** Decision D15's AI-suggestion field corrected to "Same as chosen"; count now 6 of 19 decisions
+- **Why it mattered:** The Tool Usage Summary is evidence of AI review – it must not overstate overrides
 
 ## How to talk about this in the interview
 

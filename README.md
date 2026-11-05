@@ -30,13 +30,13 @@ the caller's access policy before a templated query runs. Anything else is refus
 | `contracts/` | Data contracts per source and per curated product |
 | `docs/architecture/` | [Target architecture](docs/architecture/architecture.md): diagram, security boundaries, daily run, PoC → target, phased migration, NFRs, cost, extension points |
 | `docs/adr/` | [ADR-001…004](docs/adr/README.md): platform, history/attribution, AI grounding, late data |
-| `docs/governance/` | Quality rules, access model, lineage, monitoring, risk & failure scenarios |
-| `docs/delivery/` | Pod plan, decision rights, interfaces, readiness classification, CI/CD design |
+| `docs/governance/` | [Quality rules](docs/governance/quality_rules.md), [access model](docs/governance/access_model.md), [lineage](docs/governance/lineage.md), [monitoring](docs/governance/monitoring.md), [risks](docs/governance/risks.md) |
+| `docs/delivery/` | [Pod plan & decision rights](docs/delivery/pod_plan.md), [readiness](docs/delivery/readiness.md), [CI/CD](docs/delivery/cicd.md), [AI-assisted engineering](docs/delivery/ai_assisted_engineering.md) |
 | `dbt/` | PoC transformation project (bronze → silver → gold) |
 | `metrics/` | Single source of metric definitions (semantic layer for the PoC) |
 | `src/poc/` | Synthetic data generator, forecast, governed AI insight |
 | `tests/` | Automated tests run in CI |
-| `methodology/` | Time log, decision log, coaching moments → methodology spreadsheet |
+| `methodology/` | **[Methodology.xlsx](methodology/Methodology.xlsx)** (Deliverable 3, `make methodology`) built from the CSV logs kept during the work |
 | `docs/corrections_register.md` | Every problem found in AI output, how it was found, who spotted it, the fix |
 | `docs/explanations/` | Block-by-block walkthroughs and glossary |
 

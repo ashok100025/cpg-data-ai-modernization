@@ -3,7 +3,7 @@ PY      ?= .venv/bin/python
 DBT     ?= .venv/bin/dbt
 DBTARGS  = --project-dir dbt --profiles-dir dbt
 
-.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc all clean
+.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc methodology all clean
 
 setup:            ## create the virtualenv and install pinned dependencies
 	python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
@@ -55,6 +55,9 @@ docs: docs-generate ## generate and open the dbt docs site on http://localhost:8
 
 schema-doc: docs-generate ## regenerate docs/models/physical_schema.md from dbt's manifest + catalog
 	$(PY) src/poc/build_schema_doc.py
+
+methodology:      ## build methodology/Methodology.xlsx (Deliverable 3) + pod-plan table from the CSV logs
+	$(PY) src/poc/build_methodology_xlsx.py
 
 docker-build:     ## build the container image (needs Docker)
 	docker build -t cpg-data-ai-poc .
