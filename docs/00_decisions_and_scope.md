@@ -38,7 +38,7 @@ Status: **Locked in Block 1** (2026-11-03). Changes after this point are recorde
 | No infrastructure-as-code or live cloud deployment | Target design + Docker run path + CI | Terraform + Databricks Asset Bundles in phase 1 |
 | Three ADRs, not a full ADR log | Platform, history/attribution, AI grounding | ADR backlog listed in delivery docs |
 
-## Assumptions to confirm with stakeholders (seed — full register in Block 5)
+## Assumptions to confirm with stakeholders (seed – the full register is [`docs/requirements/assumptions_register.md`](requirements/assumptions_register.md), A-01…A-18)
 
 - Net revenue = gross sales − returns − discounts, excluding tax, in reporting currency. **Business owner: Finance.**
 - Store moves between regions are reported **as-was** (sale stays with the region at time of sale) by default, with as-is available. **Business owner: Sales Ops.**

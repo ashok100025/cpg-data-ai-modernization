@@ -3,7 +3,7 @@ PY      ?= .venv/bin/python
 DBT     ?= .venv/bin/dbt
 DBTARGS  = --project-dir dbt --profiles-dir dbt
 
-.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run all clean
+.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc all clean
 
 setup:            ## create the virtualenv and install pinned dependencies
 	python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
@@ -52,6 +52,9 @@ docs-generate:    ## dbt documentation site incl. lineage graph -> dbt/target/in
 
 docs: docs-generate ## generate and open the dbt docs site on http://localhost:8080
 	$(DBT) docs serve $(DBTARGS) --port 8080
+
+schema-doc: docs-generate ## regenerate docs/models/physical_schema.md from dbt's manifest + catalog
+	$(PY) src/poc/build_schema_doc.py
 
 docker-build:     ## build the container image (needs Docker)
 	docker build -t cpg-data-ai-poc .

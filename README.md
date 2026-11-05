@@ -11,6 +11,8 @@ runnable proof of concept, and the delivery plan for a three-engineer pod.
 > covered; depth was deliberately traded for breadth, and every cut is listed in
 > [`docs/00_decisions_and_scope.md`](docs/00_decisions_and_scope.md) with what would be needed to close it.
 
+![Target architecture](docs/architecture/diagrams/01_target_architecture.png)
+
 ## The one idea this design is built around
 
 **Every measure is defined once** (in `metrics/metrics.yml`) and that single definition is used by
@@ -23,11 +25,11 @@ the caller's access policy before a templated query runs. Anything else is refus
 | Path | What it holds |
 |---|---|
 | `docs/00_decisions_and_scope.md` | Locked decisions, assumptions, scope cuts for the time-box |
-| `docs/requirements/` | Requirements trace & assumptions register |
-| `docs/models/` | Conceptual, logical and physical data models |
+| `docs/requirements/` | [Requirements trace](docs/requirements/requirements_trace.md) & [assumptions register](docs/requirements/assumptions_register.md) |
+| `docs/models/` | [Conceptual](docs/models/conceptual_model.md), [logical](docs/models/logical_model.md) and [physical](docs/models/physical_schema.md) (generated, `make schema-doc`) data models |
 | `contracts/` | Data contracts per source and per curated product |
-| `docs/architecture/` | Target architecture diagram, security boundaries, operational flows |
-| `docs/adr/` | Architecture Decision Records |
+| `docs/architecture/` | [Target architecture](docs/architecture/architecture.md): diagram, security boundaries, daily run, PoC → target, phased migration, NFRs, cost, extension points |
+| `docs/adr/` | [ADR-001…004](docs/adr/README.md): platform, history/attribution, AI grounding, late data |
 | `docs/governance/` | Quality rules, access model, lineage, monitoring, risk & failure scenarios |
 | `docs/delivery/` | Pod plan, decision rights, interfaces, readiness classification, CI/CD design |
 | `dbt/` | PoC transformation project (bronze → silver → gold) |

@@ -110,7 +110,8 @@ Any failing test, contract or eval blocks the change.
 | Every ₹ number in an answer exists in the result rows | ✅ |
 | Audit log | ✅ one line per request, incl. refusals (SQL hash only for executed queries) |
 | dbt docs site | ✅ `dbt/target/index.html` generated (lineage incl. mart and exposures) |
-| Docker image | ⏳ not runnable here – verified by the CI `docker` job after push |
+| Docker image | ✅ CI `docker` job green on first run (commit 828859d): image built and whole PoC ran inside it in ~1.5 min |
+| CI `test` job | ✅ green on first run (commit 828859d), ~1.5 min |
 | Claude planner | ⏳ untested – no API key; guardrails identical |
 
 ## Changes made during the build (AI output corrected)

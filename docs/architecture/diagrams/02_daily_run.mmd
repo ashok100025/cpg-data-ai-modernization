@@ -1,0 +1,22 @@
+sequenceDiagram
+  autonumber
+  participant J as Lakeflow Jobs
+  participant L as Landing (volumes)
+  participant B as Bronze
+  participant S as Silver
+  participant G as Gold + metric views
+  participant F as Forecast job
+  participant O as Monitoring / on-call
+  J->>L: 02:00 new batch files arrive (Auto Loader picks up only new files)
+  J->>B: append as text + file lineage (schema drift absorbed)
+  J->>S: conform, validate, de-duplicate (MERGE on business key)
+  S-->>S: failed rows to quarantine with reason
+  S->>O: DQ batch summary, anomaly vs trailing average
+  alt quarantine spike or contract/test failure
+    O-->>J: stop downstream, alert owner, gold keeps last good version
+  else checks pass
+    J->>G: rebuild SCD2 dims, incremental fact, refresh metric views
+    G->>O: freshness + row-count signals (target: ready by 06:00 IST)
+    J->>F: weekly - backtest, forecast, per-series confidence
+  end
+  Note over S,G: Recovery - replay from landing or bronze, Delta time travel for rollback

@@ -12,33 +12,33 @@ models:
         data_type: varchar
         description: md5(source_system | source_txn_id | source_line_no) - the business key
         data_tests: [unique, not_null]
-      - {name: date_key, data_type: integer, data_tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
-      - {name: event_date_local, data_type: date, data_tests: [not_null]}
-      - {name: event_ts_utc, data_type: timestamp}
-      - {name: store_sk, data_type: varchar, data_tests: [not_null, {relationships: {arguments: {to: ref('dim_store'), field: store_sk}}}]}
-      - {name: store_code, data_type: varchar}
+      - {name: date_key, data_type: integer, description: "Sale date as yyyymmdd (local date of the store).", data_tests: [not_null, {relationships: {arguments: {to: ref('dim_date'), field: date_key}}}]}
+      - {name: event_date_local, data_type: date, description: "Sale date in the store's local time zone.", data_tests: [not_null]}
+      - {name: event_ts_utc, data_type: timestamp, description: "Sale timestamp in UTC."}
+      - {name: store_sk, data_type: varchar, description: "Store version valid on the sale date (as-was) - dim_store.", data_tests: [not_null, {relationships: {arguments: {to: ref('dim_store'), field: store_sk}}}]}
+      - {name: store_code, data_type: varchar, description: "Store business key; online orders use the fulfilling store (A-07)."}
       - {name: region_code_at_sale, data_type: varchar, description: region the store belonged to on the sale date (as-was)}
-      - {name: product_sk, data_type: varchar, data_tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_sk}}}]}
-      - {name: sku, data_type: varchar}
-      - {name: source_system, data_type: varchar, data_tests: [{accepted_values: {arguments: {values: ['POS', 'ECOM']}}}]}
-      - {name: source_txn_id, data_type: varchar}
-      - {name: source_line_no, data_type: integer}
-      - {name: channel, data_type: varchar, data_tests: [{accepted_values: {arguments: {values: ['STORE', 'ECOM']}}}]}
-      - {name: txn_type, data_type: varchar, data_tests: [{accepted_values: {arguments: {values: ['SALE', 'RETURN']}}}]}
-      - {name: qty, data_type: integer, data_tests: [not_null]}
-      - {name: units_sold, data_type: integer}
-      - {name: units_returned, data_type: integer}
-      - {name: unit_price_local, data_type: "decimal(12,2)"}
-      - {name: currency_code, data_type: varchar}
-      - {name: fx_rate_to_inr, data_type: double, data_tests: [not_null]}
-      - {name: gross_sales_inr, data_type: "decimal(14,2)"}
-      - {name: returns_inr, data_type: "decimal(14,2)"}
-      - {name: net_sales_inr, data_type: "decimal(14,2)"}
-      - {name: promo_id, data_type: varchar}
-      - {name: on_promotion, data_type: boolean}
-      - {name: is_late_arrival, data_type: boolean}
-      - {name: ingested_at, data_type: timestamp}
-      - {name: batch_id, data_type: varchar}
+      - {name: product_sk, data_type: varchar, description: "Product version valid on the sale date (as-was) - dim_product.", data_tests: [not_null, {relationships: {arguments: {to: ref('dim_product'), field: product_sk}}}]}
+      - {name: sku, data_type: varchar, description: "Product business key (SKU-nnnn)."}
+      - {name: source_system, data_type: varchar, description: "Reporting system - POS or ECOM.", data_tests: [{accepted_values: {arguments: {values: ['POS', 'ECOM']}}}]}
+      - {name: source_txn_id, data_type: varchar, description: "Transaction / order id in the source system."}
+      - {name: source_line_no, data_type: integer, description: "Line number within the source transaction."}
+      - {name: channel, data_type: varchar, description: "STORE or ECOM.", data_tests: [{accepted_values: {arguments: {values: ['STORE', 'ECOM']}}}]}
+      - {name: txn_type, data_type: varchar, description: "SALE or RETURN.", data_tests: [{accepted_values: {arguments: {values: ['SALE', 'RETURN']}}}]}
+      - {name: qty, data_type: integer, description: "Signed quantity - returns negative.", data_tests: [not_null]}
+      - {name: units_sold, data_type: integer, description: "max(qty, 0)."}
+      - {name: units_returned, data_type: integer, description: "max(-qty, 0)."}
+      - {name: unit_price_local, data_type: "decimal(12,2)", description: "Price paid per unit in local currency (after promotion discount)."}
+      - {name: currency_code, data_type: varchar, description: "ISO currency of the sale (INR, AED)."}
+      - {name: fx_rate_to_inr, data_type: double, description: "Monthly average rate to INR (A-06).", data_tests: [not_null]}
+      - {name: gross_sales_inr, data_type: "decimal(14,2)", description: "Sales value in INR for SALE lines, 0 for returns. Tax excluded (A-01)."}
+      - {name: returns_inr, data_type: "decimal(14,2)", description: "Returned value in INR (positive) for RETURN lines."}
+      - {name: net_sales_inr, data_type: "decimal(14,2)", description: "Signed value in INR = gross - returns at line level."}
+      - {name: promo_id, data_type: varchar, description: "Promotion applied (source promo code or matched promotion calendar)."}
+      - {name: on_promotion, data_type: boolean, description: "True when a promotion applied."}
+      - {name: is_late_arrival, data_type: boolean, description: "Line arrived after its batch period started (within the accepted window)."}
+      - {name: ingested_at, data_type: timestamp, description: "When the line was loaded - lineage and incremental processing."}
+      - {name: batch_id, data_type: varchar, description: "Landing batch (YYYY-MM) the line came from."}
 
   - name: dim_product
     description: >

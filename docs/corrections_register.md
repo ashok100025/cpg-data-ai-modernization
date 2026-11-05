@@ -14,7 +14,7 @@ verifying its own work, inside the review process Ashok set (explain → agree �
 |---|---|
 | **Ashok** | #1, #2, #9, #10 |
 | **AI, from Ashok's question** | #13, #14, #15, #22, #23, #28, #29 |
-| AI self-check | #3–#8, #11, #12, #16–#21, #24–#27 |
+| AI self-check | #3–#8, #11, #12, #16–#21, #24–#27, #30–#33 |
 
 ## Corrections
 
@@ -163,6 +163,26 @@ verifying its own work, inside the review process Ashok set (explain → agree �
 - **Found by:** **AI, from Ashok's question** – same review
 - **Fix:** Descriptions for all 22 models and seeds; tests added on `dim_region`
 - **Why it mattered:** The catalogue is what a receiving team reads first
+
+### #30 · Block 4–5 · Scripted edits broke structured files twice
+- **Found by:** AI self-check – leftover `read_csv` debris in bronze SQL (Block 4) and a split `decimal(12, …` type in YAML (Block 5); the second was caught by `dbt parse`
+- **Fix:** Repaired; later edits done by parsing the file structure instead of regex
+- **Why it mattered:** A broken model or YAML fails the whole build – or worse, half-works · *C11*
+
+### #31 · Block 5 · First target-architecture render was unreadable
+- **Found by:** AI self-check – looked at the rendered PNG instead of trusting "0 errors"
+- **Fix:** Re-laid out top-to-bottom in six numbered zones
+- **Why it mattered:** It is the main picture in the README and the video · *C10*
+
+### #32 · Block 5 · Mermaid parse error and overlapping Gantt labels
+- **Found by:** AI self-check – rendering every diagram before publishing
+- **Fix:** Removed `;` from sequence labels (statement separator in Mermaid); shortened Gantt section names
+- **Why it mattered:** GitHub would show an error box instead of the diagram
+
+### #33 · Block 5 · Most fact columns had no description
+- **Found by:** AI self-check – reading the generated physical schema
+- **Fix:** Descriptions for all 28 columns in `_gold.yml`; schema doc regenerated
+- **Why it mattered:** The fact is the most-read table; blanks look unfinished to a receiving team
 
 ## How to talk about this in the interview
 

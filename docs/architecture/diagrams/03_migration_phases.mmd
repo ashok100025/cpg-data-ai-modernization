@@ -1,0 +1,18 @@
+gantt
+  title Phased migration - indicative, to confirm after discovery (A-18)
+  dateFormat YYYY-MM-DD
+  axisFormat %b %Y
+  section P0 Foundation
+  Landing zone, UC, networking, IaC, CI/CD           :p0a, 2027-01-04, 4w
+  Discovery - confirm assumptions A-01..A-18          :p0b, 2027-01-04, 4w
+  section P1 Coexist
+  Ingest POS, e-com, masters into bronze/silver       :p1a, after p0a, 6w
+  Gold model + certified metrics, parallel run        :p1b, after p1a, 4w
+  Reconcile vs on-prem warehouse (exit gate)          :milestone, m1, after p1b, 0d
+  section P2 Reporting
+  Reports on metric views, retire duplicate metrics   :p2a, after m1, 6w
+  Decommission on-prem report marts                   :p2b, after p2a, 2w
+  section P3 AI and scale
+  Forecast in production, assistant pilot (1 BU)      :p3a, after p2a, 6w
+  Optional signals (value-tested), more BUs           :p3b, after p3a, 6w
+  Retire on-prem warehouse                            :milestone, m3, after p3b, 0d

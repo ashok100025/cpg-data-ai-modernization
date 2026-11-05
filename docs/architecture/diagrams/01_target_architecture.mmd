@@ -1,0 +1,61 @@
+flowchart TB
+  subgraph SRC["1 - Source systems"]
+    direction LR
+    DWH[("On-prem warehouse<br/>nightly ETL")]
+    POS["Store POS"]
+    ECOM["E-commerce"]
+    MASTERS["ERP / PIM / store master"]
+    PROMO["Trade promotions"]
+    OPT["Optional signals<br/>(phase 3, if value proven)"]
+  end
+
+  subgraph AZ["Azure - Central India - private VNet + private endpoints - secrets in Key Vault"]
+    direction TB
+    subgraph ING["2 - Ingestion"]
+      direction LR
+      SHIR["ADF / Lakeflow Connect<br/>self-hosted IR"]
+      AL["Auto Loader<br/>new files only"]
+    end
+    subgraph UC["3 - Lakehouse - Unity Catalog (cpg_dev / cpg_test / cpg_prod)"]
+      direction LR
+      LAND[["landing<br/>volumes"]] --> BRZ[("bronze<br/>as received")] --> SLV[("silver<br/>conformed, validated")] --> GLD[("gold<br/>fact + SCD2 dims<br/>contract")] --> MV[["metric views<br/>metrics.yml"]]
+      SLV --> QUAR[("quarantine<br/>+ DQ summary")]
+    end
+    subgraph TRF["4 - Build and orchestrate"]
+      direction LR
+      JOBS["Lakeflow Jobs"] --> LDP["Lakeflow pipelines + dbt<br/>tests, contracts"]
+    end
+    subgraph SRV["5 - Serving and AI"]
+      direction LR
+      SQLW["Databricks SQL<br/>serverless"]
+      FC["Forecast job"]
+      AI["AI assistant<br/>planner, guardrails, audit"]
+      LLM["LLM endpoint<br/>Model Serving / Azure OpenAI"]
+    end
+    OPS["Monitoring - Azure Monitor + UC system tables (alerts, lineage, audit)"]
+  end
+
+  subgraph CON["6 - Consumers - Entra ID SSO"]
+    direction LR
+    BI["Power BI"]
+    PLAN["Demand planning"]
+    USERS["Business users"]
+  end
+
+  DWH --> SHIR
+  POS --> AL
+  ECOM --> AL
+  MASTERS --> AL
+  PROMO --> AL
+  OPT -.-> AL
+  SHIR --> LAND
+  AL --> LAND
+  LDP -. builds .-> UC
+  MV --> SQLW
+  MV --> FC
+  SQLW --> BI
+  FC --> PLAN
+  USERS --> AI
+  AI -- "question + catalogue,<br/>never data" --> LLM
+  AI -- "compiled SQL +<br/>forced row filters" --> SQLW
+  QUAR -. alerts .-> OPS
