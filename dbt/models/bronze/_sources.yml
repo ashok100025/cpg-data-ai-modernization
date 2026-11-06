@@ -30,3 +30,8 @@ sources:
         meta:
           owner: Trade Marketing
           external_location: "read_csv('data/raw/landing/promotions/*.csv', header = true, all_varchar = true, filename = true)"
+      - name: restatements
+        description: Finance restatement approvals (restatement id, sale month, source, RESTATE or BOOK_IN_CURRENT, booking month, who, when). Empty until Finance approves; production feed from the approval workflow (ADR-004).
+        meta:
+          owner: Finance
+          external_location: "read_csv('data/raw/landing/restatements/*/*.csv', header = true, all_varchar = true, union_by_name = true, filename = true)"

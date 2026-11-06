@@ -2,7 +2,7 @@
 
 - **Status:** Proposed · **Date:** 2026-11-04
 - **Decision owner:** Architect proposes; Sales Operations (attribution) and Master Data (effective dates) confirm
-- **Related:** D6, D10 · assumptions A-02, A-08, A-12
+- **Related:** [D6](../../methodology/decision_log.csv), [D10](../../methodology/decision_log.csv) · assumptions [A-02](../requirements/assumptions_register.md#a-02), [A-08](../requirements/assumptions_register.md#a-08), [A-12](../requirements/assumptions_register.md#a-12)
 
 ## Context
 Product attributes change (category reclassification, pack size, discontinuation) and a store can be
@@ -28,7 +28,7 @@ forecast uses as-is** because future sales happen in today's structure.
 ## Consequences
 - **+** Closed reports never change when a store moves; planners still get like-for-like history.
 - **+** Any environment can be rebuilt with full history (tests prove no overlaps and one current version).
-- **−** Effective dates are only as precise as the extract cadence (month) until sources send effective-from (A-08).
+- **−** Effective dates are only as precise as the extract cadence (month) until sources send effective-from ([A-08](../requirements/assumptions_register.md#a-08)).
 - **−** Two regional views can confuse users – every answer and report states which one it uses.
 
 ## Validation needed before production

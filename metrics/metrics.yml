@@ -14,10 +14,12 @@ source:
   date_column: f.event_date_local  # used for date-range filters
 
 dimensions:
+  date:           {expr: f.event_date_local,                      description: Sale date (store local time)}
   week:           {expr: date.week_start,      join: date,        description: Week starting Monday}
   month:          {expr: date.month_start,     join: date,        description: Calendar month}
   fiscal_year:    {expr: date.fiscal_year,     join: date,        description: "Fiscal year (April start, 4-4-5)"}
   fiscal_period:  {expr: date.fiscal_period,   join: date,        description: Fiscal period 1-12}
+  accounting_month: {expr: f.accounting_month,                    description: "Month the line counts in Finance's books (sale month unless a restatement was booked later, ADR-004)"}
   region:         {expr: f.region_code_at_sale,                   description: "Region AS-WAS - region of the store on the sale date (reporting default, A-02)"}
   region_as_is:   {expr: store_now.region_code, join: store_now,  description: "Region AS-IS - store's current region (planning and forecasting)"}
   category:       {expr: product.category_name, join: product,    description: "Category AS-WAS - category on the sale date"}
@@ -106,6 +108,25 @@ metrics:
     owner: Trade Marketing
     sensitivity: commercially_sensitive
     certified: true
+
+  restated_lines:
+    description: Number of lines that entered through a Finance restatement (ADR-004).
+    expr: sum(case when f.is_restated then 1 else 0 end)
+    unit: lines
+    owner: Finance
+    sensitivity: internal
+    certified: true
+
+# Completeness signals are not business metrics: they tell a consumer how complete an official figure is.
+# Read by the AI assistant next to every answer; same owner discipline as metrics.
+completeness_signals:
+  pending_restatement:
+    description: Late sales held for a Finance restatement decision, in INR, by sale month (ADR-004).
+    table: gold.restatement_pending
+    value: pending_inr
+    month_column: event_month
+    region_column: region
+    owner: Finance
 
 # Sensitivity levels, lowest to highest. Who may see which level is enforced in Block 4 (access policy).
 sensitivity_levels: [internal, commercially_sensitive]

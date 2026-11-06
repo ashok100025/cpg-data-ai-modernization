@@ -1,5 +1,5 @@
 # CI for the proof of concept. Every push and pull request must pass before it can be merged.
-# Gates: 61 dbt data tests + the enforced fact contract, 56 Python tests incl. the AI golden-question set,
+# Gates: 73 dbt data tests + the enforced fact contract, 65 Python tests incl. the AI golden-question set,
 # the incremental October run, and the container build + run.
 name: ci
 
@@ -26,7 +26,9 @@ jobs:
         run: make ai-demo
       - name: Incremental run with late data, corrections and bad rows
         run: make demo-incremental
-      - name: Tests again after the incremental run
+      - name: Finance restatement (RESTATE + BOOK_IN_CURRENT) and report
+        run: make demo-restatement
+      - name: Tests again after the incremental run and the restatement
         run: make test
       - name: Warehouse summary
         run: make inspect

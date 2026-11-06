@@ -36,6 +36,9 @@ models:
       - {name: net_sales_inr, data_type: "decimal(14,2)", description: "Signed value in INR = gross - returns at line level."}
       - {name: promo_id, data_type: varchar, description: "Promotion applied (source promo code or matched promotion calendar)."}
       - {name: on_promotion, data_type: boolean, description: "True when a promotion applied."}
+      - {name: accounting_month, data_type: varchar, description: "Month (YYYY-MM) the line counts in Finance's books - the sale month, or the booking month of a BOOK_IN_CURRENT restatement (ADR-004).", data_tests: [not_null]}
+      - {name: restatement_id, data_type: varchar, description: "Finance restatement that released this line (null for lines accepted on time)."}
+      - {name: is_restated, data_type: boolean, description: "True when the line entered through a Finance restatement."}
       - {name: is_late_arrival, data_type: boolean, description: "Line arrived after its batch period started (within the accepted window)."}
       - {name: ingested_at, data_type: timestamp, description: "When the line was loaded - lineage and incremental processing."}
       - {name: batch_id, data_type: varchar, description: "Landing batch (YYYY-MM) the line came from."}
@@ -62,3 +65,5 @@ models:
     description: Gold - regions with country and the regional-manager role used by the access policy.
     columns:
       - {name: region_code, data_tests: [unique, not_null]}
+  - name: restatement_pending
+    description: Late lines waiting for a Finance restatement decision, valued in INR by sale month, region, category and source (ADR-004).

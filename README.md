@@ -42,13 +42,49 @@ the caller's access policy before a templated query runs. Anything else is refus
 
 ## Run it
 
-Requires Python 3.10+ (or only Docker, see below). No cloud account or API key.
+![PoC architecture](docs/architecture/diagrams/04_poc_architecture.png)
+
+### Quick start for reviewers
+
+No cloud account, no API key, no data to download – the data is generated. Pick one path:
+
+| Path | You need | Commands |
+|---|---|---|
+| **A. Docker only** (any OS, incl. Windows) | [Docker Desktop](https://www.docker.com/products/docker-desktop/) and git | `git clone https://github.com/ashok100025/cpg-data-ai-modernization`<br>`cd cpg-data-ai-modernization`<br>`docker build -t cpg-data-ai-poc .`<br>`docker run --rm cpg-data-ai-poc` |
+| **B. Mac / Linux** | git, **Python 3.10+**, **make** | `git clone https://github.com/ashok100025/cpg-data-ai-modernization`<br>`cd cpg-data-ai-modernization`<br>`make setup` (once, 1–3 min)<br>`make demo` (~35 s) |
+| **C. Windows without Docker** | WSL with Ubuntu (`wsl --install -d Ubuntu`) | In the Ubuntu terminal: `sudo apt install -y git python3 python3-venv make`, then path B |
+
+Getting the prerequisites: Mac – `xcode-select --install` (git + make) and Python from python.org or Homebrew;
+Ubuntu/Debian – `sudo apt install -y git python3 python3-venv make`. Check with `python3 --version` (3.10 or later).
+
+`make demo` (and the Docker image) runs everything in order: build the history → AI demo → land the late October
+batch → Finance restatement → all tests → summary. **What success looks like:**
+
+| Step | You should see |
+|---|---|
+| History build | `Done. PASS=73 WARN=0 ERROR=0` · forecast table with `<- selected` · `62 passed, 3 skipped` |
+| AI demo | 6 questions: `ANSWERED`, `ANSWERED_RESTRICTED`, `REFUSED_UNAUTHORIZED`, `REFUSED_UNSUPPORTED` |
+| October batch | `Done. PASS=72 WARN=1` – the one warning is the **expected** monitoring alert on the late batch |
+| Restatement | `RST-001 … 29 lines released`, a before / after table, `Quarantine: 187 rows kept, 32 marked released` |
+| Tests | `65 passed` |
+| Summary | every schema and table with row counts, and `Reconciliation: … = 231,153 fact lines` |
+
+Then explore (path B): `make inspect`, `make preview TABLE=gold.fct_sales_line`, `make ask Q="What was net revenue by region last quarter?"`, `make docs` (browser, port 8080).
+
+Troubleshooting: *"python3: command not found" or version < 3.10* – install Python 3.10+ and re-run `make setup`;
+*"make: command not found"* – install make (above) or use Docker; *port 8080 in use* – stop the other process, or run
+`.venv/bin/dbt docs serve --project-dir dbt --profiles-dir dbt --port 8081`.
+
+### Individual commands
+
+Requires Python 3.10+ (or only Docker, see above). No cloud account or API key.
 
 ```bash
 make setup             # virtualenv + pinned dependencies
 make all               # land data, build bronze -> silver -> gold -> marts, forecast, run all tests
 make demo-incremental  # land October: late rows, corrections, bad rows -> incremental run + re-forecast
-make test              # 56 Python tests: metric compiler, forecast, leakage, AI guardrails + golden set
+make demo-restatement  # Finance approves late lines (restate / book in current month) -> before / after report
+make test              # 65 Python tests: metric compiler, forecast, leakage, AI guardrails + golden set
 make ai-demo           # governed AI assistant: answered / restricted / refused
 ```
 
@@ -92,6 +128,20 @@ backtest fails `make test`. Tables: `gold.mart_sales_weekly`, `gold.forecast_wee
 
 Limitations: demand is *observed* demand (no inventory, so stock-outs are invisible); moving holidays
 (e.g. Diwali) are not modelled; production would forecast as-of ingestion time, not event time.
+
+### Late data and restatement (added in review)
+
+Late lines past the 14-day window are held, valued and shown – never silently added to closed months.
+Finance approves per sale month and source (`RESTATE` into the sale month, or `BOOK_IN_CURRENT` as an adjustment in
+the current month); approved **lines** enter the fact, every total is recalculated from the lines, nothing is
+deleted, and every published daily figure keeps its versions (`gold.agg_sales_daily` → `gold.snp_sales_daily`).
+
+```bash
+make demo-restatement     # after make all + make demo-incremental: approve, rebuild, print before / after
+```
+
+Walkthrough with two on-time sales and one late sale, table by table:
+[`docs/explanations/restatement_walkthrough.html`](docs/explanations/restatement_walkthrough.html) (open in a browser). [ADR-004](docs/adr/ADR-004-late-data-and-corrections.md) has the rules.
 
 ### Governed AI assistant (Block 4)
 

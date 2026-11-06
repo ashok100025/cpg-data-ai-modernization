@@ -127,9 +127,9 @@ means in the PDF: the simplest model that captures the main pattern, proven bett
 
 | What | Why |
 |---|---|
-| YAML key `on:` renamed to `condition:` | PyYAML reads `on` as boolean `True` – join conditions vanished (C7) |
-| Per-series confidence labels added | Overall WAPE 14.5% hid 30–64% error on the single-product Healthy Snacks series (C9) |
-| New test re-forecasting every stored backtest point | The first tests did **not** catch a deliberately leaked backtest loop; now they do (C8) |
+| YAML key `on:` renamed to `condition:` | PyYAML reads `on` as boolean `True` – join conditions vanished ([C7](../../methodology/coaching_moments.csv)) |
+| Per-series confidence labels added | Overall WAPE 14.5% hid 30–64% error on the single-product Healthy Snacks series ([C9](../../methodology/coaching_moments.csv)) |
+| New test re-forecasting every stored backtest point | The first tests did **not** catch a deliberately leaked backtest loop; now they do ([C8](../../methodology/coaching_moments.csv)) |
 | Generic test renamed to `unique_mart_grain` | Clearer name |
 
 ## How you can verify it yourself

@@ -1,0 +1,30 @@
+flowchart LR
+  GEN["generate_data.py<br/>fixed seed,<br/>injected faults"]
+  LAND[["landing CSVs<br/>pos, ecom, erp, pim,<br/>store, promotions"]]
+  BRZ[("bronze<br/>6 views, text,<br/>file lineage")]
+  SLV[("silver<br/>conformed, validated,<br/>de-duplicated")]
+  QUAR[("quarantine +<br/>DQ summary")]
+  GLD[("gold<br/>fct_sales_line + SCD2 dims<br/>contract enforced")]
+  MET[["metrics.yml +<br/>metric compiler"]]
+  MART[("mart_sales_weekly")]
+  FC["forecast.py<br/>backtest + 8-week<br/>forecast"]
+  FCT[("gold.forecast_*")]
+  AI["AI assistant<br/>planner, guardrails,<br/>access_policy.yml"]
+  AUD[("audit log")]
+
+  GEN --> LAND -- "dbt sources" --> BRZ --> SLV --> GLD --> MET
+  SLV --> QUAR
+  MET --> MART
+  MET --> FC --> FCT
+  MET --> AI --> AUD
+
+  subgraph DBT["dbt on DuckDB - data/warehouse/cpg.duckdb"]
+    BRZ
+    SLV
+    QUAR
+    GLD
+    MART
+  end
+
+  NOTE["Run with make all, Docker or GitHub Actions CI<br/>Guarded by 61 dbt tests + 56 Python tests incl. the AI golden set<br/>Inspect with make inspect / preview / query / sql / docs"]
+  style NOTE fill:#fff8dc,stroke:#c9b458

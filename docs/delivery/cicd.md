@@ -9,7 +9,7 @@
 | **test** | `cpg_test` | Full real data, masked if required | CI service principal only | Integration, reconciliation, golden set on the real LLM |
 | **prod** | `cpg_prod` | Real | CI service principal after approval | Business use |
 
-One Databricks workspace per environment (or one workspace with catalog isolation, decided in ADR-001
+One Databricks workspace per environment (or one workspace with catalog isolation, decided in [ADR-001](../adr/ADR-001-lakehouse-platform.md)
 validation); infrastructure via **Terraform**, jobs and pipelines via **Databricks Asset Bundles**.
 
 ## 2. Promotion flow

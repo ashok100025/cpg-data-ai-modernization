@@ -65,7 +65,7 @@ business and platform stakeholders."* Juniors guess; architects name the decisio
 ## 4. requirements.txt – pinned library versions
 
 **Why:** reproducibility – same code, same versions, same results next month.
-**Coaching moment C2:** the AI pinned dbt-duckdb 1.9.1 from memory; a clean install showed it was
+**Coaching moment [C2](../../methodology/coaching_moments.csv):** the AI pinned dbt-duckdb 1.9.1 from memory; a clean install showed it was
 withdrawn and pulled an incompatible dbt-core. Re-pinned to versions proven by a clean install.
 *Lesson: AI knowledge of library versions is stale by design – verify by installing.*
 
@@ -81,9 +81,9 @@ specific), converted to `Methodology.xlsx` in Block 6. Feeds the PDF's Time Log,
 Coaching Moments sheets and the video's *"one substantive example where you challenged, corrected,
 or rejected generated design or code"*.
 
-- **C1:** AI planned two weeks from the PDF; candidate corrected it from the recruiter's actual ask.
+- **[C1](../../methodology/coaching_moments.csv):** AI planned two weeks from the PDF; candidate corrected it from the recruiter's actual ask.
   *Lesson: AI plans from documents; real constraints come from people.*
-- **C2:** version pin (above).
+- **[C2](../../methodology/coaching_moments.csv):** version pin (above).
 
 ## The two commits
 

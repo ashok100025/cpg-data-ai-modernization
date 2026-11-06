@@ -25,6 +25,9 @@ def test_golden_question(bot, case):
     for key in ("metrics", "dimensions"):
         if key in exp:
             assert r.plan[key] == exp[key], (case["id"], key, r.plan)
+    for key in ("date_from", "date_to"):
+        if key in exp:
+            assert r.plan[key] == exp[key], (case["id"], key, r.plan)
     for dim, vals in exp.get("filters", {}).items():
         assert r.plan["filters"].get(dim) == vals, (case["id"], r.plan["filters"])
     if "only_region" in exp:
@@ -95,3 +98,25 @@ def test_every_request_is_audited(con, tmp_path):
 def test_answers_carry_lineage_owner_and_freshness(bot):
     r = bot.ask("Net revenue by category in 2026", "finance_analyst")
     assert r.sql and r.metrics["net_revenue"]["owner"] == "Finance" and "sales up to" in r.data_as_of and r.caveats
+
+
+def _pending(con, months, regions=None):
+    sql = "select coalesce(sum(pending_inr), 0) from gold.restatement_pending where event_month between ? and ?"
+    params = list(months)
+    if regions:
+        sql += f" and region in ({', '.join('?' for _ in regions)})"; params += regions
+    return float(con.execute(sql, params).fetchone()[0])
+
+
+def test_answers_state_pending_restatement_for_the_period(bot, con):
+    """ADR-004: an official figure is shown with the late sales still waiting for Finance, if any."""
+    r = bot.ask("What was net revenue by region in June 2026?", "finance_analyst")
+    expected = _pending(con, ("2026-06", "2026-06"))
+    assert r.pending_restatement_inr == pytest.approx(expected)
+    assert (expected > 0) == any("pending Finance restatement" in n for n in r.notes)
+
+
+def test_pending_note_respects_the_role_region_scope(bot, con):
+    r = bot.ask("What was net revenue by region in July 2026?", "regional_manager_south")
+    assert r.pending_restatement_inr == pytest.approx(_pending(con, ("2026-07", "2026-07"), ["SOUTH"]))
+    assert r.pending_restatement_inr <= _pending(con, ("2026-07", "2026-07"))

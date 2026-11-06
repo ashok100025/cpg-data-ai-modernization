@@ -7,6 +7,7 @@ model-paths: ["models"]
 seed-paths: ["seeds"]
 test-paths: ["tests"]
 macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
 
 vars:
   late_window_days: 14                 # restatement window agreed with Finance (assumption A-05)

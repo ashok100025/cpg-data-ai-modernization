@@ -204,13 +204,13 @@ allowed values for channel, txn_type, source_system, dq_reason.
 
 | What | Why |
 |---|---|
-| Quarantine warning: fixed 1% → **anomaly rule** (3× trailing average, ≥ 0.2%) | The promised warning did not fire on the October incident (0.40% < 1%). Thresholds must come from observed baselines and be proven on a bad case (coaching moment C5, decision D8) |
+| Quarantine warning: fixed 1% → **anomaly rule** (3× trailing average, ≥ 0.2%) | The promised warning did not fire on the October incident (0.40% < 1%). Thresholds must come from observed baselines and be proven on a bad case (coaching moment [C5](../../methodology/coaching_moments.csv), decision [D8](../../methodology/decision_log.csv)) |
 | Removed `dbt/.user.yml` from the repo and ignored it | dbt-generated file with a machine user id; the AI had committed it in the first attempt |
-| Removed unused `snapshot-paths` from dbt config | History is built from retained extracts, not dbt snapshots (decision D6) |
+| Removed unused `snapshot-paths` from dbt config | History is built from retained extracts, not dbt snapshots (decision [D6](../../methodology/decision_log.csv)) |
 | Bronze views no longer carry the file name twice (`filename` + `_source_file`) | Spotted while previewing a bronze view during review; results re-verified identical (same rows, units, revenue, content hash) |
 
 Earlier corrections from the first attempt are kept in the code: retries detected before the late-data
-rule (C3) and append-only landing verified by file hashes (C4).
+rule ([C3](../../methodology/coaching_moments.csv)) and append-only landing verified by file hashes ([C4](../../methodology/coaching_moments.csv)).
 
 ## How dbt is used
 

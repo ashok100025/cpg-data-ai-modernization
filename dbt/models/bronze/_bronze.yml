@@ -17,3 +17,5 @@ models:
     description: Bronze - every monthly store-master extract (store to region, time zone, currency).
   - name: brz_promotions
     description: Bronze - trade promotion calendar (promotion, SKU, region, dates, discount).
+  - name: brz_restatement_approvals
+    description: Bronze - Finance restatement approvals exactly as landed.

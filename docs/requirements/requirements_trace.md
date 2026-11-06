@@ -24,9 +24,9 @@ brief to where it is met and the test or evidence that proves it.
 | # | Brief asks | Where | Proof |
 |---|---|---|---|
 | P1 | Entities, measures, grain, keys, history, data contracts; conceptual, logical, physical models | `docs/models/`, `contracts/`, `metrics/metrics.yml` | dbt contract on `fct_sales_line`; SCD2 tests |
-| P2 | Ingestion, validation, transformation, serving; batch + incremental, schema drift, late data, dedup, lineage, recovery | `dbt/models/`, ADR-004, `docs/governance/lineage.md` | `make demo-incremental`; incremental = full refresh (content hash); quarantine reasons |
-| P3 | Governed analytics, revenue forecasting, LLM grounded in approved metrics and access policies | `metrics/`, `src/poc/forecast.py`, `src/poc/insight/`, ADR-003 | 56 Python tests incl. golden set and leakage test |
-| P4 | Target cloud architecture, phased path, security, cost, operations, DevOps, choices and alternatives | `docs/architecture/architecture.md`, ADR-001 | – (design) |
+| P2 | Ingestion, validation, transformation, serving; batch + incremental, schema drift, late data, dedup, lineage, recovery | `dbt/models/`, [ADR-004](../adr/ADR-004-late-data-and-corrections.md), `docs/governance/lineage.md` | `make demo-incremental`; incremental = full refresh (content hash); quarantine reasons |
+| P3 | Governed analytics, revenue forecasting, LLM grounded in approved metrics and access policies | `metrics/`, `src/poc/forecast.py`, `src/poc/insight/`, [ADR-003](../adr/ADR-003-ai-grounding.md) | 56 Python tests incl. golden set and leakage test |
+| P4 | Target cloud architecture, phased path, security, cost, operations, DevOps, choices and alternatives | `docs/architecture/architecture.md`, [ADR-001](../adr/ADR-001-lakehouse-platform.md) | – (design) |
 | P5 | Decision rights, interfaces, standards, acceptance criteria for a 3-engineer pod and inheriting teams | `docs/delivery/` (Block 6) | – (design) |
 
 ### Functional requirements
@@ -55,4 +55,4 @@ brief to where it is met and the test or evidence that proves it.
 | Production-scale platform | PoC on DuckDB with the same contracts; target designed, not built (`readiness.md`, Block 6) |
 | Advanced ML | Seasonal naive × trend; suitability, leakage and measurement documented instead |
 | Complex autonomous agent | Constrained planner + deterministic guardrails |
-| Single vendor choice as an end in itself | ADR-001 compares three platforms; portability via Delta, dbt and the YAML metric layer |
+| Single vendor choice as an end in itself | [ADR-001](../adr/ADR-001-lakehouse-platform.md) compares three platforms; portability via Delta, dbt and the YAML metric layer |

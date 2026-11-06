@@ -13,5 +13,5 @@ COPY . .
 # Makefile uses the system interpreter inside the image instead of a virtualenv
 ENV PY=python DBT=dbt CPG_PLANNER=rules
 
-# Full run: data -> bronze/silver/gold/marts -> forecast -> all tests -> AI demo -> summary
-CMD ["sh", "-c", "make all && make demo-incremental && make ai-demo && make inspect"]
+# Full demo: data -> bronze/silver/gold/marts -> forecast -> tests -> AI demo -> October batch -> restatement -> summary
+CMD ["make", "demo"]

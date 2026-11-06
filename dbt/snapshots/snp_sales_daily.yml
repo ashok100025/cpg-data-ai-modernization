@@ -1,0 +1,13 @@
+snapshots:
+  - name: snp_sales_daily
+    relation: ref('agg_sales_daily')
+    description: >
+      Version table at daily grain: every published value of every daily cell, with dbt_valid_from / dbt_valid_to.
+      A cell gets a new version only when its figures change (new data, correction, restatement). "As reported on
+      date X" for any day, week or month = sum of the versions valid at X. The only stored totals in the platform;
+      used for audit, never for calculation.
+    config:
+      schema: gold
+      unique_key: cell_key
+      strategy: check
+      check_cols: [gross_sales, returns_value, net_revenue, units_sold, units_returned, net_units, promo_revenue, restated_lines]

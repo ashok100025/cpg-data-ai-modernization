@@ -13,6 +13,14 @@ models:
       - {name: category, data_tests: [not_null]}
       - {name: channel, data_tests: [not_null]}
 
+  - name: agg_sales_daily
+    description: >
+      Daily summary - sale date x accounting month x region x category x channel, additive measures only (built
+      through the metric compiler). Derive any period on the fly; snapshotted into gold.snp_sales_daily.
+    columns:
+      - {name: cell_key, data_tests: [unique, not_null]}
+      - {name: accounting_month, data_tests: [not_null]}
+
 exposures:
   - name: revenue_forecast
     type: ml

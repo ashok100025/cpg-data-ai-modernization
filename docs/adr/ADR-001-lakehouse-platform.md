@@ -2,7 +2,7 @@
 
 - **Status:** Proposed (PoC built on the same patterns) · **Date:** 2026-11-03
 - **Decision owner:** Architect proposes; client platform/architecture board approves
-- **Related:** D1, D2, D14 · assumptions A-14, A-15
+- **Related:** [D1](../../methodology/decision_log.csv), [D2](../../methodology/decision_log.csv), [D14](../../methodology/decision_log.csv) · assumptions [A-14](../requirements/assumptions_register.md#a-14), [A-15](../requirements/assumptions_register.md#a-15)
 
 ## Context
 Sales, product, store and promotion data sit in an on-prem warehouse with nightly ETL plus cloud

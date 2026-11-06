@@ -1,22 +1,23 @@
 sequenceDiagram
   autonumber
-  participant J as Lakeflow Jobs
+  participant SRC as Source systems
   participant L as Landing (volumes)
   participant B as Bronze
   participant S as Silver
   participant G as Gold + metric views
   participant F as Forecast job
   participant O as Monitoring / on-call
-  J->>L: 02:00 new batch files arrive (Auto Loader picks up only new files)
-  J->>B: append as text + file lineage (schema drift absorbed)
-  J->>S: conform, validate, de-duplicate (MERGE on business key)
-  S-->>S: failed rows to quarantine with reason
+  Note over SRC,O: Every step below is triggered, retried and monitored by Lakeflow Jobs (orchestration). The arrows show where the DATA moves.
+  SRC->>L: 02:00 batch files delivered
+  L->>B: Auto Loader reads only new files, appends as text + file lineage
+  B->>S: conform, validate, de-duplicate (MERGE on business key)
+  S-->>S: failed rows to quarantine with a reason
   S->>O: DQ batch summary, anomaly vs trailing average
-  alt quarantine spike or contract/test failure
-    O-->>J: stop downstream, alert owner, gold keeps last good version
+  alt quarantine spike or contract / test failure
+    O-->>G: stop downstream, gold keeps last good version, owner alerted
   else checks pass
-    J->>G: rebuild SCD2 dims, incremental fact, refresh metric views
-    G->>O: freshness + row-count signals (target: ready by 06:00 IST)
-    J->>F: weekly - backtest, forecast, per-series confidence
+    S->>G: rebuild SCD2 dims, incremental fact, refresh metric views
+    G->>O: freshness + row-count signals (target - ready by 06:00 IST)
+    G->>F: weekly - backtest, forecast, per-series confidence
   end
-  Note over S,G: Recovery - replay from landing or bronze, Delta time travel for rollback
+  Note over L,G: Recovery - replay from landing or bronze (append-only), Delta time travel for rollback

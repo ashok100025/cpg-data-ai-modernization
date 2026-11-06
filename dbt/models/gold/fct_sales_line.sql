@@ -1,6 +1,8 @@
 -- Gold: sales fact. Grain = one source sales or return line event (business key = source
 -- system + transaction id + line number). Quantities are signed (returns negative).
 -- Amounts are converted to the reporting currency at the monthly average rate (assumption A-06).
+-- accounting_month = the month the line counts in Finance's books (= sale month unless Finance booked a
+-- restatement in a later month, ADR-004); restated lines carry their restatement_id.
 -- Dimensions are joined as-was: the product/store version valid on the local sale date.
 with promo as (
     select sku, region_code, cast(start_date as date) as start_date, cast(end_date as date) as end_date,
@@ -53,6 +55,9 @@ select
     cast(coalesce(promo_code, matched_promo_id) as varchar)                 as promo_id,
     coalesce(promo_code, matched_promo_id) is not null                      as on_promotion,
     cast(is_late_arrival as boolean)                                        as is_late_arrival,
+    cast(accounting_month as varchar)                                       as accounting_month,
+    cast(restatement_id as varchar)                                         as restatement_id,
+    cast(is_restated as boolean)                                            as is_restated,
     cast(ingested_at as timestamp)                                          as ingested_at,
     cast(batch_id as varchar)                                               as batch_id
 from with_promo

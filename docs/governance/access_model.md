@@ -7,8 +7,8 @@ Who may see what, how it is enforced in the PoC, and how it maps to Unity Catalo
 | Level | Meaning | Examples | Default access |
 |---|---|---|---|
 | `internal` | Business data for employees with a need | net revenue, units, return rate | Analysts, managers (within row scope) |
-| `commercially_sensitive` | Would harm the company if leaked to competitors or retailers (A-16) | `avg_selling_price`, `promo_revenue`, `promo_revenue_share` | Finance, Commercial leadership |
-| `restricted` (reserved) | Personal or regulated data | none in scope (A-17) | Separate design required |
+| `commercially_sensitive` | Would harm the company if leaked to competitors or retailers ([A-16](../requirements/assumptions_register.md#a-16)) | `avg_selling_price`, `promo_revenue`, `promo_revenue_share` | Finance, Commercial leadership |
+| `restricted` (reserved) | Personal or regulated data | none in scope ([A-17](../requirements/assumptions_register.md#a-17)) | Separate design required |
 
 Labels live on each metric in `metrics/metrics.yml`; in production they become **Unity Catalog tags**.
 
@@ -47,7 +47,7 @@ alter table gold.fct_sales_line set row filter gold.region_filter on (region_cod
 ## 4. AI access path
 The assistant runs **as the asking user's role** – it never has broader access than the user. The LLM
 receives the question and catalogue metadata only, **never rows**; SQL comes from the compiler; the
-row scope is forced after planning. See ADR-003.
+row scope is forced after planning. See [ADR-003](../adr/ADR-003-ai-grounding.md).
 
 ## 5. Operating the model
 - **Access requests** through group membership (IAM process), never direct grants to people.

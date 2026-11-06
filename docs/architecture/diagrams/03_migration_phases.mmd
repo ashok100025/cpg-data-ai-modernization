@@ -1,18 +1,19 @@
 gantt
-  title Phased migration - indicative, to confirm after discovery (A-18)
+  title Phased migration - scenario M (assumed mid-size client), example start Mon 4 Jan 2027 = week 1
   dateFormat YYYY-MM-DD
-  axisFormat %b %Y
+  axisFormat Wk %W (%d %b)
+  tickInterval 2week
   section P0 Foundation
-  Landing zone, UC, networking, IaC, CI/CD           :p0a, 2027-01-04, 4w
-  Discovery - confirm assumptions A-01..A-18          :p0b, 2027-01-04, 4w
+  Landing zone, UC, networking, IaC, CI/CD (wk 1-4)        :p0a, 2027-01-04, 4w
+  Discovery - inventory + confirm assumptions (wk 1-4)     :p0b, 2027-01-04, 4w
   section P1 Coexist
-  Ingest POS, e-com, masters into bronze/silver       :p1a, after p0a, 6w
-  Gold model + certified metrics, parallel run        :p1b, after p1a, 4w
-  Reconcile vs on-prem warehouse (exit gate)          :milestone, m1, after p1b, 0d
+  Ingest ~10 sources into bronze/silver (wk 5-10)          :p1a, after p0a, 6w
+  Gold model + certified metrics, parallel run (wk 11-14)  :p1b, after p1a, 4w
+  Reconciliation sign-off - exit gate (wk 14)              :milestone, m1, after p1b, 0d
   section P2 Reporting
-  Reports on metric views, retire duplicate metrics   :p2a, after m1, 6w
-  Decommission on-prem report marts                   :p2b, after p2a, 2w
+  Move ~100 reports to metric views (wk 15-20)             :p2a, after m1, 6w
+  Decommission on-prem report marts (wk 21-22)             :p2b, after p2a, 2w
   section P3 AI and scale
-  Forecast in production, assistant pilot (1 BU)      :p3a, after p2a, 6w
-  Optional signals (value-tested), more BUs           :p3b, after p3a, 6w
-  Retire on-prem warehouse                            :milestone, m3, after p3b, 0d
+  Forecast live, assistant pilot 1 BU (wk 21-26)           :p3a, after p2a, 6w
+  Optional signals if value proven, more BUs (wk 27-32)    :p3b, after p3a, 6w
+  Retire on-prem warehouse (wk 32)                         :milestone, m3, after p3b, 0d

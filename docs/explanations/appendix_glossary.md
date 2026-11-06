@@ -6,6 +6,8 @@ they come up.
 | Term | Full form | Meaning in this project |
 |---|---|---|
 | **4-4-5 calendar** | – | Retail/fiscal calendar: each 13-week quarter is split into periods of 4, 4 and 5 **whole weeks**, so every period has the same weekdays and weekends and year-on-year comparisons are fair. 52 weeks a year, with a 53rd week every 5–6 years. Variants: 4-5-4, 5-4-4. Which one the client uses is confirmed with Finance. |
+| **Accounting month** | – | The month a line counts in Finance's books. Normally the sale month; for a late line booked under BOOK_IN_CURRENT, the booking month. Column `accounting_month` on the fact. |
+| **Adjustment line** | – | A separate fact line holding only the difference when a late correction is booked in a later month, so the closed month keeps its figure. |
 | **ADLS Gen2** | Azure Data Lake Storage Gen2 | Azure's storage for data lakes; holds the Delta tables and landing files. |
 | **ADR** | Architecture Decision Record | Short document recording one important decision: context, options, decision, consequences, validation needed before production. The PDF requires at least two (`docs/adr/`). |
 | **Anomaly-based alert** | – | An alert that compares a value with its own recent baseline (e.g. 3× the trailing 6-batch average) instead of a fixed limit. Fires on real incidents, stays quiet on normal variation. |
@@ -15,10 +17,12 @@ they come up.
 | **Backtest** | – | Testing a forecast on the past: pretend it is an earlier date, forecast forward using only data before that date, and compare with what actually happened. *Rolling-origin* = repeated at several cut-off dates. |
 | **Bias (forecast)** | – | Whether a forecast is systematically too high (+) or too low (−): (forecast − actual) ÷ actual, summed. |
 | **Blue/green deployment** | – | Build the new version beside the old one, validate it, then switch consumers over in one step; switch back if needed. |
+| **BOOK_IN_CURRENT / RESTATE** | – | Finance's two restatement decisions: put late lines into the current open month (closed month unchanged), or back into their own sale month (closed month gets a new version). |
 | **Bronze / Silver / Gold** | Medallion architecture | Data layers. **Bronze** = raw, as received. **Silver** = cleaned, typed, de-duplicated, validated. **Gold** = business-ready facts and dimensions for reporting, forecasting and AI. |
 | **Business key** | – | The identifier that makes a record unique in business terms (here: source system + transaction id + line number). Used to de-duplicate and apply corrections. |
 | **CI** | Continuous Integration | Automatic build and test on every push / pull request (here GitHub Actions). A failing check blocks the change. |
 | **CODEOWNERS** | – | GitHub file naming who must review changes to which paths – makes ownership enforceable. |
+| **Completeness signal** | – | A number telling a consumer how complete an official figure is – here the late sales still pending restatement, shown next to answers. |
 | **Conceptual / logical / physical model** | – | Three levels of data modelling: **conceptual** = business entities and relationships; **logical** = keys, attributes, grain, history, database-independent; **physical** = real tables, columns, types, storage choices. |
 | **Confidence label** | – | High / medium / low tag on each forecast series from its own backtest WAPE (< 20%, 20–35%, > 35%), so consumers know which numbers to trust. |
 | **Container / Docker** | – | A packaged, isolated runtime with the exact OS, Python and libraries; `docker run` behaves the same on any machine. |
@@ -43,6 +47,7 @@ they come up.
 | **Grounding** | – | An AI answer is grounded when every fact in it comes from an approved source – here every number comes from the query result, which comes from certified metrics. |
 | **Guardrails** | – | Deterministic checks around an AI component that it cannot override: catalogue validation, access policy, forced filters, row caps. |
 | **Handoff classification** | – | How ready a component is to give to a receiving team: PoC-only, prototype, or production-candidate. |
+| **Idempotent** | – | Running the same job again gives the same result. Proven here by repeated incremental runs and a full rebuild producing the same content hash. |
 | **Incremental load** | – | Processing only data that arrived since the last run, instead of rebuilding everything. Must give exactly the same result as a full rebuild. |
 | **Lakeflow** | – | Databricks' ingestion (Lakeflow Connect), pipeline (Lakeflow Declarative Pipelines, formerly DLT) and orchestration (Lakeflow Jobs) products. |
 | **Leakage (data leakage)** | – | When a model is trained or tested with information it would not have had at forecast time (future values, later-arriving data). Makes accuracy look better than it really is. |
@@ -50,6 +55,7 @@ they come up.
 | **Liquid clustering** | – | Delta feature that organises data by chosen columns (e.g. date, store, SKU) so queries scan less. |
 | **LLM** | Large Language Model | AI model that works with text (e.g. Claude). Here only allowed to translate a question into a plan. |
 | **Mart** | Data mart | A consumption-ready table shaped for a use case (here: weekly sales by region, category, channel). |
+| **Materiality** | – | The size of an error below which Finance does not reopen a closed period (often a % of revenue); decides RESTATE vs BOOK_IN_CURRENT ([A-20](../requirements/assumptions_register.md#a-20)). |
 | **Mermaid** | – | Text syntax for diagrams inside markdown; GitHub renders it as a picture. |
 | **Metric catalogue / semantic layer** | – | The single place where business measures are defined (formula, owner, meaning). Consumers ask for metrics by name instead of writing their own SQL. Here: `metrics/metrics.yml` + compiler; in production: Unity Catalog metric views. |
 | **Mutation testing** | – | Breaking the code on purpose to prove a test fails when it should. |
@@ -71,6 +77,7 @@ they come up.
 | **Self-hosted integration runtime (IR)** | – | ADF agent installed inside the client's network so the cloud can read on-prem databases securely. |
 | **Semantic versioning (semver)** | – | Version numbers MAJOR.MINOR.PATCH: major = breaking change, minor = additive, patch = fix. |
 | **SKU** | Stock Keeping Unit | The unique code for one sellable product variant (e.g. a specific juice in a 1-litre pack). |
+| **Snapshot (dbt)** | – | A dbt feature that keeps every past version of a table's rows with `dbt_valid_from` / `dbt_valid_to`. Used for the daily version table `gold.snp_sales_daily`. |
 | **SSO / Entra ID** | Single Sign-On / Microsoft Entra ID (formerly Azure AD) | Company login and group membership; in production the user's groups decide their role. |
 | **Surrogate key (`_sk`)** | – | A system-generated key for a dimension row (one per version in SCD2), e.g. `product_sk`. Facts link to it, so a sale points to the exact product version valid on the sale date. |
 | **Survivorship rule** | – | When two systems hold the same attribute, the rule that decides whose value wins (here: ERP for pack size/status, PIM for brand/category). |

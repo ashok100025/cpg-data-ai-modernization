@@ -47,6 +47,7 @@ class Response:
     params: list = field(default_factory=list)
     metrics: dict = field(default_factory=dict)
     data_as_of: str | None = None
+    pending_restatement_inr: float = 0.0
     notes: list = field(default_factory=list)
     caveats: list = field(default_factory=list)
     audit_id: str = ""
@@ -130,8 +131,42 @@ class Assistant:
                          "Narrow the question for a complete answer.")
             rows = rows[: self.policy.max_rows]
         status = RESTRICTED if decision.restricted else ANSWERED
+        pending = self._pending_restatement(plan, filters)
+        if pending > 0:
+            total = None
+            if "net_revenue" in plan.metrics:
+                j = cols.index("net_revenue")
+                total = sum(float(r[j] or 0) for r in rows)
+            share = f" ({100 * pending / total:.1f}% of the figure shown)" if total else ""
+            notes.append(f"₹{pending:,.0f}{share} of late sales for this period is pending Finance restatement and is "
+                         "not included above (ADR-004).")
         return Response(status, self._compose(plan, cols, rows), sql=q.sql, params=q.params, metrics=q.metadata,
-                        columns=cols, rows=[list(r) for r in rows], notes=notes, caveats=CAVEATS, **base)
+                        columns=cols, rows=[list(r) for r in rows], notes=notes, caveats=CAVEATS,
+                        pending_restatement_inr=pending, **base)
+
+    # ------------------------------------------------------------ completeness: late sales awaiting Finance
+    def _pending_restatement(self, plan: QueryPlan, filters: dict) -> float:
+        """Pending restatement value for the months the answer covers, within the same region scope
+        (the role's forced region filter or the question's region filter). Defined in metrics.yml
+        completeness_signals.pending_restatement."""
+        sig = self.catalog.spec.get("completeness_signals", {}).get("pending_restatement")
+        if not sig:
+            return 0.0
+        where, params = [], []
+        if plan.date_from:
+            where.append(f"{sig['month_column']} >= ?"); params.append(plan.date_from[:7])
+        if plan.date_to:
+            where.append(f"{sig['month_column']} <= ?"); params.append(plan.date_to[:7])
+        if filters.get("region"):
+            where.append(f"{sig['region_column']} in ({', '.join('?' for _ in filters['region'])})")
+            params += list(filters["region"])
+        if "category" in filters:
+            where.append(f"category in ({', '.join('?' for _ in filters['category'])})"); params += list(filters["category"])
+        sql = f"select coalesce(sum({sig['value']}), 0) from {sig['table']}" + (" where " + " and ".join(where) if where else "")
+        try:
+            return float(self.con.execute(sql, params).fetchone()[0])
+        except duckdb.CatalogException:
+            return 0.0
 
     # ------------------------------------------------------------ answer text: template over result rows only
     def _fmt(self, metric: str, v) -> str:

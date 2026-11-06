@@ -29,6 +29,10 @@ cases:
     role: sales_analyst
     question: What is demand for Beverages in the West region by week last month?
     expect: {status: ANSWERED, metrics: [net_units], dimensions: [week], filters: {category: [Beverages], region: [WEST]}}
+  - id: A7
+    role: finance_analyst
+    question: What was net revenue by region in June 2026?
+    expect: {status: ANSWERED, metrics: [net_revenue], dimensions: [region], date_from: "2026-06-01", date_to: "2026-06-30"}
   # ---------------- answered, restricted by row-level policy
   - id: R1
     demo: true

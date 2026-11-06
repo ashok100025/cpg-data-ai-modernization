@@ -21,11 +21,11 @@ Status: **Locked in Block 1** (2026-11-03). Changes after this point are recorde
 
 | ID | Decision | Why | Owner |
 |---|---|---|---|
-| L1 | Target platform: Azure + Databricks + Delta + Unity Catalog; alternative Snowflake + dbt | Fits a hybrid on-prem→cloud path, one governance plane for data and AI; detailed in ADR-001 | Architect (proposes) / Client platform team (approves) |
+| L1 | Target platform: Azure + Databricks + Delta + Unity Catalog; alternative Snowflake + dbt | Fits a hybrid on-prem→cloud path, one governance plane for data and AI; detailed in [ADR-001](adr/ADR-001-lakehouse-platform.md) | Architect (proposes) / Client platform team (approves) |
 | L2 | PoC on Python + DuckDB + dbt, packaged in Docker | Any engineer can run it in minutes with no cloud account; dbt preserves contracts, tests, snapshots and lineage that port to Databricks | Architect |
 | L3 | Medallion layering (bronze / silver / gold) | Separates raw replayable history from conformed and consumption layers; maps 1:1 to target | Architect |
 | L4 | Metrics defined once in `metrics/metrics.yml`; every consumer reads it | Removes the core client problem (duplicate measure definitions) | Architect + Business metric owners |
-| L5 | AI assistant is constrained to metric/dimension selection, never free SQL | Answers stay traceable and policy-checked; detailed in ADR-003 | Architect |
+| L5 | AI assistant is constrained to metric/dimension selection, never free SQL | Answers stay traceable and policy-checked; detailed in [ADR-003](adr/ADR-003-ai-grounding.md) | Architect |
 | L6 | LLM provider is pluggable; default is an offline deterministic provider | No API key available for the PoC and reviewers must reproduce outputs; Claude API / Ollama can be switched on by env var | Architect |
 | L7 | Commits authored by the candidate; AI co-authorship shown in commit trailers | Brief asks to show how AI tools were used and corrected | Candidate |
 
@@ -38,7 +38,7 @@ Status: **Locked in Block 1** (2026-11-03). Changes after this point are recorde
 | No infrastructure-as-code or live cloud deployment | Target design + Docker run path + CI | Terraform + Databricks Asset Bundles in phase 1 |
 | Three ADRs, not a full ADR log | Platform, history/attribution, AI grounding | ADR backlog listed in delivery docs |
 
-## Assumptions to confirm with stakeholders (seed – the full register is [`docs/requirements/assumptions_register.md`](requirements/assumptions_register.md), A-01…A-18)
+## Assumptions to confirm with stakeholders (seed – the full register is [`docs/requirements/assumptions_register.md`](requirements/assumptions_register.md), A-01…A-19)
 
 - Net revenue = gross sales − returns − discounts, excluding tax, in reporting currency. **Business owner: Finance.**
 - Store moves between regions are reported **as-was** (sale stays with the region at time of sale) by default, with as-is available. **Business owner: Sales Ops.**

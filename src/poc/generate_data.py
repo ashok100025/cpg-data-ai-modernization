@@ -8,6 +8,7 @@ Writes landing files that look like what the client's systems actually send:
   data/raw/landing/pim_product/extract=YYYY-MM-01/*.csv   PIM product master (owns brand, category)
   data/raw/landing/store_ref/extract=YYYY-MM-01/*.csv     store -> region reference (a store moves region)
   data/raw/landing/promotions/promotions.csv              trade promotions
+  data/raw/landing/restatements/approvals/approvals.csv   Finance restatement approvals (empty at start)
 
 Faults are injected on purpose so quality rules have something to catch:
   retries (exact duplicates), corrections (re-sent lines with new values), late arrivals,
@@ -206,7 +207,9 @@ def batch_ingested_at(batch: str) -> str:
 POS_COLS = ["TXN_ID", "LINE_NO", "TXN_TS_LOCAL", "STORE_CODE", "SKU", "QTY", "UNIT_PRICE", "CURRENCY", "TXN_TYPE", "LOADED_AT"]
 ECOM_COLS = ["order_id", "item_seq", "event_time_utc", "fulfilment_node", "product_code", "quantity", "price_amount",
              "price_ccy", "event_type", "ingested_at"]
-DRIFT_FROM = "2026-05"   # e-commerce adds promo_code from this batch on
+DRIFT_FROM = "2026-05"
+APPROVAL_COLS = ["restatement_id", "period", "source_system", "decision", "booking_month", "approved_by",
+                 "approved_at", "note"]   # e-commerce adds promo_code from this batch on
 
 
 def write_csv(path: Path, cols, rows):
@@ -325,6 +328,8 @@ def land(root: Path, demo_batch: bool):
         d = date(d.year + (d.month == 12), d.month % 12 + 1, 1)
 
     if not demo_batch:
+      # Finance restatement approvals feed: starts empty (header only); filled by approve_restatement.py
+      write_csv(landing / "restatements" / "approvals" / "approvals.csv", APPROVAL_COLS, [])
       write_csv(landing / "promotions" / "promotions.csv",
               ["promo_id", "sku", "region_code", "start_date", "end_date", "discount_pct"],
               [dict(pr, start_date=pr["start_date"].isoformat(), end_date=pr["end_date"].isoformat()) for pr in promos])

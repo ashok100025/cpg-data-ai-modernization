@@ -180,6 +180,13 @@ class RulesPlanner:
         elif _has(q, "ytd") or _has(q, "year to date"):
             p.date_from, p.date_to = ctx["fiscal_year_start"], as_of.isoformat()
             p.date_label = f"fiscal year to date ({p.date_from} to {p.date_to})"
+        elif m := re.search(r"(?<![a-z])(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* (20\d\d)(?!\d)", q):
+            mon = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].index(m.group(1)) + 1
+            y = int(m.group(2))
+            first = date(y, mon, 1)
+            last = date(y + (mon == 12), mon % 12 + 1, 1) - timedelta(days=1)
+            p.date_from, p.date_to = first.isoformat(), min(last, as_of).isoformat()
+            p.date_label = f"{first:%B %Y}" + (" to date" if last > as_of else "")
         elif (m := re.search(r"fy ?(20\d\d)", q)) and (fy := ctx["fiscal_years"].get(int(m.group(1)))):
             p.date_from, p.date_to = fy["from"], min(fy["to"], as_of.isoformat())
             p.date_label = f"fiscal year {fy['label']}" + (" to date" if fy["to"] > as_of.isoformat() else "")

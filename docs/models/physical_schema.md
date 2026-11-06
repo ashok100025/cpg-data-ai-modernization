@@ -151,6 +151,23 @@ Bronze - trade promotion calendar (promotion, SKU, region, dates, discount).
 | 6 | `discount_pct` | VARCHAR |  |  |
 | 7 | `_source_file` | VARCHAR |  |  |
 
+#### `bronze.brz_restatement_approvals`  
+*view (view, sql)*
+
+Bronze - Finance restatement approvals exactly as landed.
+
+| # | Column | Type | Description | Tests |
+|---|---|---|---|---|
+| 1 | `restatement_id` | VARCHAR |  |  |
+| 2 | `period` | VARCHAR |  |  |
+| 3 | `source_system` | VARCHAR |  |  |
+| 4 | `decision` | VARCHAR |  |  |
+| 5 | `booking_month` | VARCHAR |  |  |
+| 6 | `approved_by` | VARCHAR |  |  |
+| 7 | `approved_at` | VARCHAR |  |  |
+| 8 | `note` | VARCHAR |  |  |
+| 9 | `_source_file` | VARCHAR |  |  |
+
 #### `bronze.brz_store_master`  
 *view (view, sql)*
 
@@ -223,6 +240,20 @@ Silver - ERP and PIM extracts joined per SKU and extract month with survivorship
 | 11 | `in_pim` | BOOLEAN |  |  |
 | 12 | `has_pack_size_conflict` | BOOLEAN |  |  |
 
+#### `silver.slv_restatement_approvals`  
+*base table (table, sql)*
+
+| # | Column | Type | Description | Tests |
+|---|---|---|---|---|
+| 1 | `restatement_id` | VARCHAR |  |  |
+| 2 | `period` | VARCHAR |  |  |
+| 3 | `source_system` | VARCHAR |  |  |
+| 4 | `decision` | VARCHAR |  |  |
+| 5 | `booking_month` | VARCHAR |  |  |
+| 6 | `approved_by` | VARCHAR |  |  |
+| 7 | `approved_at` | TIMESTAMP |  |  |
+| 8 | `note` | VARCHAR |  |  |
+
 #### `silver.slv_sales`  
 *base table (incremental, sql)*
 
@@ -250,8 +281,12 @@ Silver, incremental delete+insert - valid, de-duplicated sales lines; one row pe
 | 18 | `batch_id` | VARCHAR |  |  |
 | 19 | `source_file` | VARCHAR |  |  |
 | 20 | `days_late` | BIGINT |  |  |
-| 21 | `versions_in_load` | BIGINT |  |  |
-| 22 | `is_late_arrival` | BOOLEAN |  |  |
+| 21 | `restatement_id` | VARCHAR |  |  |
+| 22 | `restated_line_key` | VARCHAR |  |  |
+| 23 | `versions_in_load` | BIGINT |  |  |
+| 24 | `is_late_arrival` | BOOLEAN |  |  |
+| 25 | `accounting_month` | VARCHAR |  |  |
+| 26 | `is_restated` | BOOLEAN |  |  |
 
 #### `silver.slv_sales_conformed`  
 *base table (incremental, sql)*
@@ -310,6 +345,9 @@ Silver - rows that failed a quality rule, with the reason. Never silently droppe
 | 19 | `source_file` | VARCHAR |  |  |
 | 20 | `days_late` | BIGINT |  |  |
 | 21 | `dq_reason` | VARCHAR | Quality rule that failed. | accepted_values, not_null |
+| 22 | `value_inr` | DECIMAL(14,2) |  |  |
+| 23 | `release_status` | VARCHAR |  |  |
+| 24 | `restatement_id` | VARCHAR |  |  |
 
 #### `silver.slv_store_history`  
 *base table (table, sql)*
@@ -327,6 +365,28 @@ Silver - typed store reference, one row per store per monthly extract. Input to 
 
 
 ### Schema `gold`
+
+#### `gold.agg_sales_daily`  
+*base table (table, python)*
+
+Daily summary - sale date x accounting month x region x category x channel, additive measures only (built through the metric compiler). Derive any period on the fly; snapshotted into gold.snp_sales_daily.
+
+| # | Column | Type | Description | Tests |
+|---|---|---|---|---|
+| 1 | `cell_key` | VARCHAR |  | not_null, unique |
+| 2 | `date` | DATE |  |  |
+| 3 | `accounting_month` | VARCHAR |  | not_null |
+| 4 | `region` | VARCHAR |  |  |
+| 5 | `category` | VARCHAR |  |  |
+| 6 | `channel` | VARCHAR |  |  |
+| 7 | `gross_sales` | DECIMAL(38,2) |  |  |
+| 8 | `returns_value` | DECIMAL(38,2) |  |  |
+| 9 | `net_revenue` | DECIMAL(38,2) |  |  |
+| 10 | `units_sold` | HUGEINT |  |  |
+| 11 | `units_returned` | HUGEINT |  |  |
+| 12 | `net_units` | HUGEINT |  |  |
+| 13 | `promo_revenue` | DECIMAL(38,2) |  |  |
+| 14 | `restated_lines` | HUGEINT |  |  |
 
 #### `gold.dim_date`  
 *base table (table, sql)*
@@ -429,9 +489,12 @@ Sales fact at the grain of one source sales/return line event. Signed quantities
 | 23 | `net_sales_inr` | DECIMAL(14,2) | Signed value in INR = gross - returns at line level. |  |
 | 24 | `promo_id` | VARCHAR | Promotion applied (source promo code or matched promotion calendar). |  |
 | 25 | `on_promotion` | BOOLEAN | True when a promotion applied. |  |
-| 26 | `is_late_arrival` | BOOLEAN | Line arrived after its batch period started (within the accepted window). |  |
-| 27 | `ingested_at` | TIMESTAMP | When the line was loaded - lineage and incremental processing. |  |
-| 28 | `batch_id` | VARCHAR | Landing batch (YYYY-MM) the line came from. |  |
+| 26 | `accounting_month` | VARCHAR | Month (YYYY-MM) the line counts in Finance's books - the sale month, or the booking month of a BOOK_IN_CURRENT restatement (ADR-004). | not_null |
+| 27 | `restatement_id` | VARCHAR | Finance restatement that released this line (null for lines accepted on time). |  |
+| 28 | `is_restated` | BOOLEAN | True when the line entered through a Finance restatement. |  |
+| 29 | `is_late_arrival` | BOOLEAN | Line arrived after its batch period started (within the accepted window). |  |
+| 30 | `ingested_at` | TIMESTAMP | When the line was loaded - lineage and incremental processing. |  |
+| 31 | `batch_id` | VARCHAR | Landing batch (YYYY-MM) the line came from. |  |
 
 #### `gold.mart_sales_weekly`  
 *base table (table, python)*
@@ -457,6 +520,22 @@ Table tests: unique_mart_grain
 | 13 | `avg_selling_price` | DOUBLE |  |  |
 | 14 | `promo_revenue_share` | DOUBLE |  |  |
 
+#### `gold.restatement_pending`  
+*base table (table, sql)*
+
+Late lines waiting for a Finance restatement decision, valued in INR by sale month, region, category and source (ADR-004).
+
+| # | Column | Type | Description | Tests |
+|---|---|---|---|---|
+| 1 | `event_month` | VARCHAR |  |  |
+| 2 | `region` | VARCHAR |  |  |
+| 3 | `category` | VARCHAR |  |  |
+| 4 | `source_system` | VARCHAR |  |  |
+| 5 | `pending_lines` | BIGINT |  |  |
+| 6 | `pending_inr` | DECIMAL(38,2) |  |  |
+| 7 | `first_arrived_at` | TIMESTAMP |  |  |
+| 8 | `last_arrived_at` | TIMESTAMP |  |  |
+
 
 ### Sources (landing files)
 
@@ -467,4 +546,5 @@ Table tests: unique_mart_grain
 | `landing.pim_product` | Marketing (PIM) | `read_csv('data/raw/landing/pim_product/*/*.csv')` | PIM product master, monthly full extract. Owns brand and category. |
 | `landing.pos` | Retail IT (POS platform) | `read_csv('data/raw/landing/pos/*/*.csv')` | Store POS sales and return lines (schema A, local time, returns as +qty with TXN_TYPE=RETURN). Monthly batches `batch=YYYY-MM`. |
 | `landing.promotions` | Trade Marketing | `read_csv('data/raw/landing/promotions/*.csv')` | Trade promotion calendar (single file). |
+| `landing.restatements` | Finance | `read_csv('data/raw/landing/restatements/*/*.csv')` | Finance restatement approvals (restatement id, sale month, source, RESTATE or BOOK_IN_CURRENT, booking month, who, when). Empty until Finance approves; production feed from the approval workflow (ADR-004). |
 | `landing.store_ref` | Sales Operations | `read_csv('data/raw/landing/store_ref/*/*.csv')` | Store master, monthly full extract. Owns store name, region, time zone, currency. |

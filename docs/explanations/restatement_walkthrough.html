@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Late Sale Restatement Walkthrough</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+<style>
+/* Layout: a timeline stepper on top; below it every table of the pipeline, grouped by layer, re-rendered for the chosen moment */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --ink:#1c2430; --muted:#5d6b7d; --line:#d9dee6;
+  --accent:#1f6f8b; --accent-soft:#e3f0f5;
+  --new:#e4f4e8; --new-ink:#1d6b34; --chg:#fff3d6; --chg-ink:#8a5a00;
+  --prop:#efe9fb; --prop-ink:#5b3fa0; --empty:#8a96a6;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171e; --surface:#1a212b; --ink:#e4e9f0; --muted:#9aa8ba; --line:#2c3644;
+  --accent:#5fb3cf; --accent-soft:#16303b;
+  --new:#173826; --new-ink:#86d9a0; --chg:#3a2f12; --chg-ink:#f0c766;
+  --prop:#2a2342; --prop-ink:#c3b1f5; --empty:#748296; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171e; --surface:#1a212b; --ink:#e4e9f0; --muted:#9aa8ba; --line:#2c3644;
+  --accent:#5fb3cf; --accent-soft:#16303b;
+  --new:#173826; --new-ink:#86d9a0; --chg:#3a2f12; --chg-ink:#f0c766;
+  --prop:#2a2342; --prop-ink:#c3b1f5; --empty:#748296; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+h1{font-family:var(--f-display);font-size:30px;line-height:1.15;margin:0;text-wrap:balance;letter-spacing:.01em}
+.lede{color:var(--muted);max-width:70ch;margin:6px 0 0}
+.example{display:grid;gap:8px}
+.example h2,.layer h2{font-family:var(--f-display);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+.tx{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.txc{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:grid;gap:2px}
+.txc b{font-family:var(--f-mono);font-weight:500}
+.txc span{color:var(--muted);font-size:13px}
+.txc.late{border-color:var(--chg-ink)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;counter-reset:s}
+.step{appearance:none;text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px 12px;cursor:pointer;font:inherit;display:grid;gap:2px}
+.step:hover{border-color:var(--accent)}
+.step:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.step[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.step .when{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.step .what{font-weight:600;font-size:14px}
+.now{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;padding:14px 16px;display:grid;gap:8px}
+.now h3{margin:0;font-family:var(--f-display);font-size:20px}
+.now p{margin:0;max-width:80ch}
+.ceo{background:var(--accent-soft);border-radius:6px;padding:10px 12px}
+.ceo strong{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted);align-items:center}
+.chip{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:500}
+.chip.new{background:var(--new);color:var(--new-ink)}
+.chip.chg{background:var(--chg);color:var(--chg-ink)}
+.chip.prop{background:var(--prop);color:var(--prop-ink)}
+.chip.calc{background:var(--accent-soft);color:var(--accent)}
+.layers{display:grid;gap:20px}
+.layer{display:grid;gap:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px}
+@media (max-width:420px){.grid{grid-template-columns:1fr}}
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:6px;min-width:0;display:grid;grid-template-rows:auto 1fr}
+.tbl header{padding:10px 12px 6px;display:grid;gap:4px}
+.tbl .name{font-family:var(--f-mono);font-size:13.5px;font-weight:500;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tbl .desc{font-size:12.5px;color:var(--muted)}
+.scroll{overflow-x:auto;padding:0 12px 12px}
+table{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:500;color:var(--muted);border-bottom:1px solid var(--line);padding:5px 8px 5px 0;white-space:nowrap}
+th.p{color:var(--prop-ink)}
+td{padding:5px 8px 5px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+tr.new td{background:var(--new)}
+tr.chg td{background:var(--chg)}
+td.num{text-align:right}
+.emptyrow{color:var(--empty);font-style:italic;font-family:var(--f-body);font-size:13px;padding:8px 0}
+.foot{font-size:13px;color:var(--muted);max-width:90ch}
+@media (prefers-reduced-motion:no-preference){.tbl{transition:border-color .2s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div>
+    <h1>Late sale restatement, table by table</h1>
+    <p class="lede">Store S004 (Bengaluru, region SOUTH), June 2026. Two sales arrive on time; one arrives four months late. Pick a moment to see every table and view in the pipeline at that point: what is stored, what changes, and what stays empty.</p>
+  </div>
+
+  <section class="example" aria-label="The three sales">
+    <h2>The three sales</h2>
+    <div class="tx">
+      <div class="txc"><b>T1 · S004-0001 / line 1</b><span>Sold 10 Jun · 2 × ₹100 = ₹200 · arrives in the June batch</span></div>
+      <div class="txc"><b>T2 · S004-0002 / line 1</b><span>Sold 20 Jun · 1 × ₹300 = ₹300 · arrives in the June batch</span></div>
+      <div class="txc late"><b>T3 · S004-0003 / line 1</b><span>Sold 20 Jun · 1 × ₹50 = ₹50 · terminal offline, arrives in the October batch (103 days late)</span></div>
+    </div>
+  </section>
+
+  <nav class="steps" role="tablist" aria-label="Moments in time" id="steps"></nav>
+
+  <section class="now" id="now" aria-live="polite"></section>
+
+  <div class="legend">
+    <span><span class="chip new">new row</span> added at this moment</span>
+    <span><span class="chip chg">changed row</span> a value changed at this moment</span>
+    <span><span class="chip prop">added</span> table or column added for restatement (ADR-004)</span>
+    <span><span class="chip calc">calculated</span> not stored, computed from the fact on every query</span>
+  </div>
+
+  <div class="layers" id="layers"></div>
+
+  <p class="foot">Nothing is ever deleted: landing files, bronze and <code>slv_sales_conformed</code> are append-only, and the late row stays in quarantine with its status changed. Totals are never edited by hand: the daily summary and every view are recalculated from the line-level fact. The version table keeps every value each day has had, so any figure "as reported on" a date can be rebuilt. Run <code>make demo-restatement</code> to see the same flow on the PoC data.</p>
+</div>
+
+<script>
+const STEPS = [
+  {id:"t1", when:"1 Jul · 02:00", what:"June batch loads",
+   title:"1 July, 02:00: the June batch loads T1 and T2",
+   text:"Both sales are on time and valid. They flow through every layer. The daily summary is rebuilt from the fact, and the version table snapshots it: each day gets version 1. June revenue, calculated from the lines, is ₹500.",
+   ceo:"June so far: ₹500 (month not yet closed)."},
+  {id:"t1b", when:"5 Jul", what:"Finance closes June",
+   title:"5 July: Finance closes June and reports ₹500",
+   text:"No data moves. Finance publishes ₹500, which is exactly the sum of the daily versions valid on 5 July. Because those versions are kept, 'June as reported on 5 July' can be reproduced later, even after a restatement.",
+   ceo:"June: ₹500 (closed, version 1)."},
+  {id:"t2", when:"1 Nov · 02:00", what:"Late T3 arrives",
+   title:"1 November, 02:00: the October batch brings the late June sale T3",
+   text:"T3 is appended to landing, bronze and slv_sales_conformed like any line. It is 103 days late, past the 14-day window, so it is marked LATE_BEYOND_WINDOW and held in quarantine. slv_sales, the fact and the daily summary do not change, so June stays ₹500 and the version table gets no new version. The pending view values what is waiting: ₹50.",
+   ceo:"June: ₹500 official. A further ₹50 (10% in this small example) of late June sales is pending Finance restatement; including it, ₹550."},
+  {id:"t3a", when:"16 Nov · 02:00", what:"Decision A: restate June",
+   title:"15 November Finance approves RST-001 = RESTATE; the 16 November run applies it",
+   text:"The approval arrives as a row in the approvals feed. On the next run T3 is released: its quarantine row stays, with status released. T3 is inserted into slv_sales and the fact with accounting month June and restatement ID RST-001. The daily summary for 20 June is recalculated: ₹300 becomes ₹350. The version table closes version 1 of that day and opens version 2. June is now ₹550; June as reported on 5 July is still ₹500.",
+   ceo:"June: ₹550 (restated on 16 Nov, RST-001). Originally reported ₹500 on 5 Jul."},
+  {id:"t3b", when:"16 Nov · 02:00", what:"Decision B: book in November",
+   title:"Alternative: Finance approves RST-001 = BOOK_IN_CURRENT (book in November)",
+   text:"Same release, but T3 gets accounting month November. The 20 June cell for accounting month June keeps version 1 (₹300); a new cell 20 June / accounting month November (₹50) appears. Finance's June stays ₹500; November's books include the +₹50 adjustment. By sale date (operations and forecast) June is ₹550, because the sale really happened in June.",
+   ceo:"June: ₹500 (closed, unchanged). ₹50 of late June sales booked as an adjustment in November."}
+];
+
+const ROWS = {
+  T1b:["S004-0001","1","2026-06-10 11:02","S004","SKU-0011","2","100.00","2026-06"],
+  T2b:["S004-0002","1","2026-06-20 17:45","S004","SKU-0015","1","300.00","2026-06"],
+  T3b:["S004-0003","1","2026-06-20 18:20","S004","SKU-0006","1","50.00","2026-10"]
+};
+const at = (id, list) => list.includes(id);
+const after = id => STEPS.findIndex(s=>s.id===id);
+
+function tables(step){
+  const i = after(step), A = step==="t3a", B = step==="t3b", rel = A||B, late = i>=2;
+  const st = (from) => (after(from)===i ? "new" : "");
+  return [
+   {layer:"Landing and bronze (append-only, never edited)", items:[
+     {name:"landing files", desc:"Files exactly as the source delivered them.",
+      cols:["file","lines"],
+      rows:[
+        {c:["pos/batch=2026-06/pos_sales.csv","T1, T2"], s:st("t1")},
+        late && {c:["pos/batch=2026-10/pos_sales.csv","T3 (+ other October lines)"], s:st("t2")},
+        rel && {c:["restatements/approvals.csv","RST-001"], s:"new", p:true}
+      ]},
+     {name:"bronze.brz_pos_sales", desc:"Every landed line, all columns as text, with the batch it came in.",
+      cols:["TXN_ID","LINE_NO","TXN_TS_LOCAL","STORE_CODE","SKU","QTY","UNIT_PRICE","_batch"],
+      rows:[{c:ROWS.T1b,s:st("t1")},{c:ROWS.T2b,s:st("t1")}, late && {c:ROWS.T3b,s:st("t2")}]}
+   ]},
+   {layer:"Silver", items:[
+     {name:"silver.slv_sales_conformed", desc:"Every line ever received, in one format, with its quality verdict. Append-only.",
+      cols:["line","sale_date","batch_id","days_late","dq_reason"],
+      rows:[
+        {c:["T1","2026-06-10","2026-06","0","–"],s:st("t1")},
+        {c:["T2","2026-06-20","2026-06","0","–"],s:st("t1")},
+        late && {c:["T3","2026-06-20","2026-10","103","LATE_BEYOND_WINDOW"],s:st("t2")}
+      ]},
+     {name:"silver.slv_sales_quarantine", desc:"Lines that failed a rule. Kept forever; only the release status changes.",
+      cols:["line","sale_date","dq_reason","value_inr*","release_status*","restatement_id*"], pcols:[3,4,5],
+      rows:[ late && {c:["T3","2026-06-20","LATE_BEYOND_WINDOW","50.00", rel?"released":"pending", rel?"RST-001":"–"], s: i===2?"new": rel?"chg":""} ]},
+     {name:"silver.slv_sales", desc:"The current truth: valid lines only, one row per sale. Gold reads this.",
+      cols:["line","sale_date","qty","unit_price","restatement_id*"], pcols:[4],
+      rows:[
+        {c:["T1","2026-06-10","2","100.00","–"],s:st("t1")},
+        {c:["T2","2026-06-20","1","300.00","–"],s:st("t1")},
+        rel && {c:["T3","2026-06-20","1","50.00","RST-001"],s:"new"}
+      ]},
+     {name:"silver.slv_restatement_approvals", proposed:true, desc:"Finance's decisions, landed as a feed from the approval workflow.",
+      cols:["restatement_id","period","source","decision","booking_month","approved_by","approved_at"],
+      rows:[ rel && {c:["RST-001","2026-06","POS", A?"RESTATE":"BOOK_IN_CURRENT", A?"–":"2026-11","finance.controller","2026-11-15 10:00"], s:"new"} ]}
+   ]},
+   {layer:"Gold", items:[
+     {name:"gold.fct_sales_line", desc:"Line-level fact. Every total below is calculated from these rows.",
+      cols:["line","sale_date","region_at_sale","net_sales_inr","accounting_month*","restatement_id*","is_restated*"], pcols:[4,5,6],
+      rows:[
+        {c:["T1","2026-06-10","SOUTH","200.00","2026-06","–","false"],s:st("t1")},
+        {c:["T2","2026-06-20","SOUTH","300.00","2026-06","–","false"],s:st("t1")},
+        rel && {c:["T3","2026-06-20","SOUTH","50.00", A?"2026-06":"2026-11","RST-001","true"],s:"new"}
+      ]},
+     {name:"gold.restatement_pending", proposed:true, desc:"Late lines waiting for a Finance decision, valued in INR.",
+      cols:["event_month","region","source","lines","pending_inr"],
+      rows:[ (i===2) && {c:["2026-06","SOUTH","POS","1","50.00"],s:"new"} ]},
+     {name:"gold.agg_sales_daily", proposed:true, desc:"Daily summary: sale date × accounting month × region × channel (× category), additive measures. Rebuilt from the fact every run; weekly and monthly figures are derived from it.",
+      cols:["date","accounting_month","region","channel","net_revenue","restated_lines"],
+      rows:[
+        {c:["2026-06-10","2026-06","SOUTH","STORE","200.00","0"],s:st("t1")},
+        {c:["2026-06-20","2026-06","SOUTH","STORE", A?"350.00":"300.00", A?"1":"0"],s: i===0?"new": A?"chg":""},
+        B && {c:["2026-06-20","2026-11","SOUTH","STORE","50.00","1"],s:"new"}
+      ]},
+     {name:"gold.snp_sales_daily", proposed:true, desc:"Version table: every value each daily cell has had, with when it was valid. The only stored totals; used for audit, never for calculation.",
+      cols:["date","accounting_month","net_revenue","version","dbt_valid_from","dbt_valid_to"],
+      rows:[
+        {c:["2026-06-10","2026-06","200.00","1","2026-07-01","–"],s:st("t1")},
+        {c:["2026-06-20","2026-06","300.00","1","2026-07-01", A?"2026-11-16":"–"],s: i===0?"new": A?"chg":""},
+        A && {c:["2026-06-20","2026-06","350.00","2","2026-11-16","–"],s:"new"},
+        B && {c:["2026-06-20","2026-11","50.00","1","2026-11-16","–"],s:"new"}
+      ]}
+   ]},
+   {layer:"Consumption (calculated on every query, never stored)", items:[
+     {name:"metric views · mart · AI answers", calc:true, desc:"What anyone sees when they ask for revenue. Computed from the fact through the metric catalogue.",
+      cols:["question","net_revenue"],
+      rows:[
+        {c:["June 2026, by sale date", rel?"550.00":"500.00"], s: rel?"chg": i===0?"new":""},
+        {c:["June 2026, by accounting month", A?"550.00":"500.00"], s: A?"chg": i===0?"new":""},
+        {c:["Nov 2026, by accounting month (these lines only)", B?"50.00":"0.00"], s: B?"chg": i===0?"new":""},
+        (i===2) && {c:["Pending restatement for June (note on answers)","50.00"], s:"new"},
+        (i>=1) && {c:["June 2026 as reported on 5 Jul (from the version table)","500.00"], s: i===1?"new":""}
+      ]}
+   ]}
+  ];
+}
+
+const stepsEl = document.getElementById("steps"), nowEl = document.getElementById("now"), layersEl = document.getElementById("layers");
+let current = "t1";
+try { const h = location.hash.slice(1); if (STEPS.some(s=>s.id===h)) current = h; } catch(e){}
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function render(){
+  stepsEl.innerHTML = STEPS.map((s,k)=>`<button class="step" role="tab" id="tab-${s.id}" aria-selected="${s.id===current}" data-id="${s.id}"><span class="when">${k+1} · ${esc(s.when)}</span><span class="what">${esc(s.what)}</span></button>`).join("");
+  const s = STEPS.find(x=>x.id===current);
+  nowEl.innerHTML = `<h3>${esc(s.title)}</h3><p>${esc(s.text)}</p><div class="ceo"><strong>If the CEO asks for June revenue now</strong>${esc(s.ceo)}</div>`;
+  layersEl.innerHTML = tables(current).map(L=>`
+    <section class="layer"><h2>${esc(L.layer)}</h2><div class="grid">${L.items.map(t=>{
+      const rows = t.rows.filter(Boolean);
+      const badge = t.proposed?'<span class="chip prop">added</span>':(t.calc?'<span class="chip calc">calculated</span>':'');
+      const head = t.cols.map((c,k)=>`<th class="${(t.pcols||[]).includes(k)||t.proposed?'p':''}">${esc(c)}</th>`).join("");
+      const body = rows.length ? rows.map(r=>`<tr class="${r.s||''}">${r.c.map(v=>`<td class="${/^[\d.]+$/.test(v)&&v.includes('.')?'num':''}">${esc(v)}</td>`).join("")}</tr>`).join("")
+        : `<tr><td colspan="${t.cols.length}" class="emptyrow">(empty)</td></tr>`;
+      return `<article class="tbl"><header><div class="name">${esc(t.name)} ${badge}</div><div class="desc">${esc(t.desc)}</div></header><div class="scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div></article>`;
+    }).join("")}</div></section>`).join("");
+}
+stepsEl.addEventListener("click", e=>{
+  const b = e.target.closest(".step"); if(!b) return;
+  current = b.dataset.id;
+  try { history.replaceState(null,"","#"+current); } catch(err){}
+  render();
+});
+window.addEventListener("hashchange",()=>{const h=location.hash.slice(1); if(STEPS.some(s=>s.id===h)){current=h;render();}});
+render();
+</script>
+<p style="display:none">Columns marked * are proposed additions to existing tables.</p>
+
+</body>
+</html>

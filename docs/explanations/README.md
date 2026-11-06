@@ -11,6 +11,8 @@ and how. Written for revision and for explaining the work to others.
 | [block_04_ai_docker_ci.md](block_04_ai_docker_ci.md) | Block 4 – governed AI assistant, Docker, CI |
 | [block_05_architecture_pack.md](block_05_architecture_pack.md) | Block 5 – requirements, models, architecture, ADRs |
 | [block_06_governance_delivery.md](block_06_governance_delivery.md) | Block 6 – governance, pod plan, readiness, CI/CD, methodology workbook |
+| [block_07_review_guide.md](block_07_review_guide.md) | Block 7 – review guide: reading order, interviewer questions, weak points |
+| [restatement_walkthrough.html](restatement_walkthrough.html) | Interactive: two on-time sales and one late sale, every table at five moments (open in a browser) |
 | [appendix_glossary.md](appendix_glossary.md) | Definitions and full forms of terms used across the work |
 
 Working agreement for every block: **explain → agree → build locally → verify → push only on approval.**

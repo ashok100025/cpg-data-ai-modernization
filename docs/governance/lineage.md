@@ -23,6 +23,11 @@ known before it is changed.
 5. **Bronze** → `brz_pos_sales` / `brz_ecom_orders` with `_source_file`.
 6. **File** → `data/raw/landing/pos/batch=2026-08/pos_sales.csv` (production: UC volume path).
 
+## Restated figures
+A restated number is traceable too: the fact line carries `restatement_id` → `slv_restatement_approvals` (who
+approved, when, decision) → the quarantine row (why it was held) → its source file. Every earlier published value
+of the same day remains in `gold.snp_sales_daily` with its validity period.
+
 ## Rules
 - Every new consumer is registered as a **dbt exposure** (owner, type, depends-on) before go-live.
 - A change to a model with exposures downstream needs the exposure owners informed (CI/CD notes – contract change management).

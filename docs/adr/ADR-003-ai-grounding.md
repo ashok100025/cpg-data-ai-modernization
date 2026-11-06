@@ -2,7 +2,7 @@
 
 - **Status:** Proposed · **Date:** 2026-11-05
 - **Decision owner:** Architect proposes; Data Governance and Security approve
-- **Related:** D3, D9, D12, D13 · assumptions A-15, A-16, A-17
+- **Related:** [D3](../../methodology/decision_log.csv), [D9](../../methodology/decision_log.csv), [D12](../../methodology/decision_log.csv), [D13](../../methodology/decision_log.csv) · assumptions [A-15](../requirements/assumptions_register.md#a-15), [A-16](../requirements/assumptions_register.md#a-16), [A-17](../requirements/assumptions_register.md#a-17)
 
 ## Context
 The brief asks for an LLM-assisted insight grounded in approved metrics and access policies, with
@@ -34,4 +34,4 @@ with bound parameters; the answer text is a template over the result rows; every
 1. Test the LLM planner against the golden set (≥ the offline planner's pass rate) with an enterprise endpoint.
 2. Red-team session (prompt injection, data exfiltration, role escalation) with Security.
 3. Pilot with one business unit: measure answer accuracy, refusal rate and user feedback.
-4. Map roles to real SSO groups and UC row filters (A-15).
+4. Map roles to real SSO groups and UC row filters ([A-15](../requirements/assumptions_register.md#a-15)).

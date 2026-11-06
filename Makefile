@@ -3,7 +3,7 @@ PY      ?= .venv/bin/python
 DBT     ?= .venv/bin/dbt
 DBTARGS  = --project-dir dbt --profiles-dir dbt
 
-.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc methodology all clean
+.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc methodology demo-restatement demo all clean
 
 setup:            ## create the virtualenv and install pinned dependencies
 	python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
@@ -11,8 +11,11 @@ setup:            ## create the virtualenv and install pinned dependencies
 data:             ## land the deterministic synthetic history (Jan 2025 - Sep 2026)
 	rm -rf data/raw/landing && $(PY) src/poc/generate_data.py
 
-build:            ## bronze -> silver -> gold, with all data tests
-	mkdir -p data/warehouse && $(DBT) build --full-refresh $(DBTARGS)
+build:            ## bronze -> silver -> gold from an empty warehouse, with all data tests (snapshot starts at version 1)
+	rm -rf data/warehouse && mkdir -p data/warehouse && $(DBT) build --full-refresh $(DBTARGS)
+
+demo-restatement: ## Finance approves RST-001 (June POS, RESTATE) and RST-002 (Aug e-com, BOOK_IN_CURRENT); run; report
+	$(PY) src/poc/approve_restatement.py --demo && $(DBT) build $(DBTARGS) && $(PY) src/poc/forecast.py > /dev/null && $(PY) src/poc/restatement_report.py
 
 forecast:         ## backtest + 8-week forecast of net revenue and net units -> gold.forecast_*
 	$(PY) src/poc/forecast.py
@@ -64,6 +67,9 @@ docker-build:     ## build the container image (needs Docker)
 
 docker-run:       ## run the whole PoC inside the container
 	docker run --rm cpg-data-ai-poc
+
+demo:             ## the whole demo in the right order (~35 s after setup)
+	$(MAKE) all && $(MAKE) ai-demo && $(MAKE) demo-incremental && $(MAKE) demo-restatement && $(MAKE) test && $(MAKE) inspect
 
 all: data build forecast test
 

@@ -9,10 +9,10 @@ cross-team conflicts are resolved, and how the receiving teams take it over.
 |---|---|---|---|
 | **Architect and pod lead** | Ashok | Architecture, ADRs, standards, stakeholder alignment, reconciliation, coaching | Technology and design choices (with platform board approval), standards, definition of done, priorities within the pod |
 | **Engineer A – Data platform** | (to staff) | Ingestion, source contracts, silver quality and history, platform pipelines | Ingestion patterns, quality-rule implementation, source onboarding sequence |
-| **Engineer B – Modelling, metrics, forecast** | (to staff) | Gold model, metric catalogue implementation, forecast, reconciliation support | Model structure within ADR-002, forecast model selection by backtest |
-| **Engineer C – AI, serving, DevOps** | (to staff) | Assistant, access policy implementation, CI/CD, observability | Assistant implementation within ADR-003, pipeline and deployment tooling |
+| **Engineer B – Modelling, metrics, forecast** | (to staff) | Gold model, metric catalogue implementation, forecast, reconciliation support | Model structure within [ADR-002](../adr/ADR-002-history-and-attribution.md), forecast model selection by backtest |
+| **Engineer C – AI, serving, DevOps** | (to staff) | Assistant, access policy implementation, CI/CD, observability | Assistant implementation within [ADR-003](../adr/ADR-003-ai-grounding.md), pipeline and deployment tooling |
 
-Every workstream has a **named second** (pairing) so no knowledge sits with one person (risk R-12).
+Every workstream has a **named second** (pairing) so no knowledge sits with one person (risk [R-12](../governance/risks.md#r-12)).
 
 ## 2. Workstreams
 
@@ -39,21 +39,21 @@ reporting (P1 exit), WS5 is piloted with one business unit in P3.
 
 | Decision | Architect (Ashok) | Engineers | Business owner | Platform / Security | Data Governance |
 |---|---|---|---|---|---|
-| Platform and technology choices (ADR-001) | D | C | I | **A** | C |
-| Data model, history, attribution (ADR-002) | D | C | **A** – Sales Ops, Master Data | I | I |
+| Platform and technology choices ([ADR-001](../adr/ADR-001-lakehouse-platform.md)) | D | C | I | **A** | C |
+| Data model, history, attribution ([ADR-002](../adr/ADR-002-history-and-attribution.md)) | D | C | **A** – Sales Ops, Master Data | I | I |
 | **Metric definitions** (`metrics.yml`) | C | C (implement) | **D** – metric owner (Finance for revenue) | – | A (sensitivity) |
 | Access policy and sensitivity | C | C (implement) | C | C | **D** |
-| Late-data window and restatement (ADR-004) | C (mechanism) | I | **D** – Finance | I | I |
+| Late-data window and restatement ([ADR-004](../adr/ADR-004-late-data-and-corrections.md)) | C (mechanism) | I | **D** – Finance | I | I |
 | Source contract changes | C | D (Eng A, technical) | **A** – source owner | I | I |
 | Breaking change to a gold contract | **D** | C | C – exposure owners | I | I |
 | Forecast model selection | C | **D** – Eng B, by backtest | A – Demand Planning | – | – |
-| AI scope, golden set, refusal rules (ADR-003) | C | D – Eng C proposes | C | C | **A** |
+| AI scope, golden set, refusal rules ([ADR-003](../adr/ADR-003-ai-grounding.md)) | C | D – Eng C proposes | C | C | **A** |
 | Production deployment | A (release) | D – Eng C runs | I | A (change process) | – |
 | Budget and cost limits | C | I | **D** – sponsor | C | – |
 
 ## 4. Resolving cross-team conflicts
 
-The most likely conflict is **two business units defining the same measure differently** (risk R-06), or
+The most likely conflict is **two business units defining the same measure differently** (risk [R-06](../governance/risks.md#r-06)), or
 **Finance and Sales Ops disagreeing on attribution** (the store-move case). The process:
 
 1. **Make the difference visible** – compute both versions side by side on real data (the metric compiler
@@ -68,7 +68,7 @@ The most likely conflict is **two business units defining the same measure diffe
 
 *Example from this case study:* Sales Ops wanted store S003's history to move to WEST; Finance needed
 closed SOUTH numbers to stay fixed. Resolution: **as-was is the reporting default** (Finance), **as-is is
-available as `region_as_is`** for planning (Sales Ops) – ADR-002.
+available as `region_as_is`** for planning (Sales Ops) – [ADR-002](../adr/ADR-002-history-and-attribution.md).
 
 ## 5. Interfaces with other teams
 
