@@ -149,6 +149,9 @@ Ask questions in plain English; answers come **only** from approved metrics, **o
 may see, with SQL, owner and data freshness attached. The planner (offline rules by default; Claude
 optional via `CPG_PLANNER=anthropic` + `ANTHROPIC_API_KEY`, untested here) only turns the question
 into a plan – it never writes SQL and never sees data. Guardrails, SQL and answer text are deterministic.
+**No LLM runs in this PoC**; in the target an LLM replaces the rules planner behind the same interface.
+
+![AI question flow](docs/architecture/diagrams/05_ai_question_flow.png)
 
 ```bash
 make ai-demo                                                     # 6 scripted questions, all four outcomes

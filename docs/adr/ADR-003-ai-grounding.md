@@ -23,6 +23,11 @@ controlled; answers must be traceable; reviewers must reproduce results without 
 the access policy checks sensitivity and forces the role's row scope; SQL comes only from the compiler
 with bound parameters; the answer text is a template over the result rows; every request is audited.
 
+![AI question flow](../architecture/diagrams/05_ai_question_flow.png)
+
+**In the PoC no LLM runs:** the rules planner is the default, so the demo needs no API key. The Claude planner is
+implemented but untested (validation item 1 below).
+
 ## Consequences
 - **+** A misbehaving or manipulated planner cannot reach forbidden data (proven by malicious-planner tests).
 - **+** Same definitions as BI and the forecast; every answer shows its SQL, owner and data freshness.

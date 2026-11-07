@@ -12,6 +12,8 @@ and how. Written for revision and for explaining the work to others.
 | [block_05_architecture_pack.md](block_05_architecture_pack.md) | Block 5 – requirements, models, architecture, ADRs |
 | [block_06_governance_delivery.md](block_06_governance_delivery.md) | Block 6 – governance, pod plan, readiness, CI/CD, methodology workbook |
 | [block_07_review_guide.md](block_07_review_guide.md) | Block 7 – review guide: reading order, interviewer questions, weak points |
+| [block_08_video_script.md](block_08_video_script.md) | Block 8 – timed video script, live commands, recording checklist |
+| [video_teleprompter.html](video_teleprompter.html) | Block 8 – run sheet with segment timers and copyable commands (open in a browser) |
 | [restatement_walkthrough.html](restatement_walkthrough.html) | Interactive: two on-time sales and one late sale, every table at five moments (open in a browser) |
 | [appendix_glossary.md](appendix_glossary.md) | Definitions and full forms of terms used across the work |
 

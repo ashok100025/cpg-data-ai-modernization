@@ -3,7 +3,7 @@ PY      ?= .venv/bin/python
 DBT     ?= .venv/bin/dbt
 DBTARGS  = --project-dir dbt --profiles-dir dbt
 
-.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc methodology demo-restatement demo all clean
+.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc methodology demo-restatement demo video-prep all clean
 
 setup:            ## create the virtualenv and install pinned dependencies
 	python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
@@ -70,6 +70,9 @@ docker-run:       ## run the whole PoC inside the container
 
 demo:             ## the whole demo in the right order (~35 s after setup)
 	$(MAKE) all && $(MAKE) ai-demo && $(MAKE) demo-incremental && $(MAKE) demo-restatement && $(MAKE) test && $(MAKE) inspect
+
+video-prep:       ## starting state for the video: clean history build + dbt docs; then run the live steps in the script
+	$(MAKE) clean && $(MAKE) all && $(MAKE) docs-generate && rm -rf outputs/audit && echo "Ready: history built. Live: demo-incremental -> demo-restatement -> ask"
 
 all: data build forecast test
 

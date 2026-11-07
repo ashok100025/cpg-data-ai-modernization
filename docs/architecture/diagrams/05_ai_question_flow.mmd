@@ -1,0 +1,27 @@
+flowchart LR
+  Q(["User question<br/>+ role from sign-on"])
+  subgraph PL["Planner - replaceable; never sees data, never writes SQL"]
+    direction TB
+    RULES["PoC: rules planner<br/>keyword rules, offline<br/>default, no API key"]
+    LLMP["Target: LLM planner<br/>Model Serving / Azure OpenAI<br/>(Claude option in code, untested)"]
+  end
+  PLAN[["Plan JSON<br/>metric, dimensions,<br/>filters, period"]]
+  VAL["1 - Validate<br/>against metrics.yml"]
+  POL["2 - Access policy<br/>sensitivity check,<br/>forced row scope"]
+  CMP["3 - Metric compiler<br/>SQL with bound<br/>parameters"]
+  DB[("Gold / metric views<br/>DuckDB in PoC")]
+  ANS["Template answer<br/>figures, SQL, owner,<br/>pending note"]
+  REF["Refusal<br/>UNSUPPORTED /<br/>UNAUTHORIZED"]
+  AUD[("Audit log<br/>every request")]
+
+  Q --> RULES
+  Q -.-> LLMP
+  RULES --> PLAN
+  LLMP -. "sees question +<br/>catalogue only" .-> PLAN
+  PLAN --> VAL --> POL --> CMP --> DB --> ANS --> AUD
+  VAL -- "unknown metric" --> REF
+  POL -- "not allowed" --> REF
+  REF --> AUD
+
+  style LLMP stroke-dasharray: 5 5
+  style REF fill:#fdecea,stroke:#c0392b

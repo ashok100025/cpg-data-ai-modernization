@@ -164,7 +164,7 @@ on a laptop:
 flowchart LR
   GEN["generate_data.py<br/>fixed seed,<br/>injected faults"]
   LAND[["landing CSVs<br/>pos, ecom, erp, pim,<br/>store, promotions"]]
-  BRZ[("bronze<br/>6 views, text,<br/>file lineage")]
+  BRZ[("bronze<br/>7 views, text,<br/>file lineage")]
   SLV[("silver<br/>conformed, validated,<br/>de-duplicated")]
   QUAR[("quarantine +<br/>DQ summary")]
   GLD[("gold<br/>fct_sales_line + SCD2 dims<br/>contract enforced")]
@@ -172,7 +172,7 @@ flowchart LR
   MART[("mart_sales_weekly")]
   FC["forecast.py<br/>backtest + 8-week<br/>forecast"]
   FCT[("gold.forecast_*")]
-  AI["AI assistant<br/>planner, guardrails,<br/>access_policy.yml"]
+  AI["AI assistant<br/>rules planner (no LLM in PoC),<br/>guardrails, access_policy.yml"]
   AUD[("audit log")]
 
   GEN --> LAND -- "dbt sources" --> BRZ --> SLV --> GLD --> MET
@@ -189,7 +189,7 @@ flowchart LR
     MART
   end
 
-  NOTE["Run with make all, Docker or GitHub Actions CI<br/>Guarded by 61 dbt tests + 56 Python tests incl. the AI golden set<br/>Inspect with make inspect / preview / query / sql / docs"]
+  NOTE["Run with make all, Docker or GitHub Actions CI<br/>Guarded by 73 dbt tests + 65 Python tests incl. the AI golden set<br/>Inspect with make inspect / preview / query / sql / docs"]
   style NOTE fill:#fff8dc,stroke:#c9b458
 ```
 </details>
@@ -205,9 +205,20 @@ Each PoC piece and its production equivalent:
 | dbt gold + enforced contract | dbt-databricks, same models and contract | SQL dialect tweaks |
 | `metrics.yml` + compiler | UC metric views generated from the same YAML | Compiler kept for the assistant |
 | `forecast.py` | Scheduled job; MLflow for runs and metrics | Same models and backtest |
-| `src/poc/insight` + offline planner | Assistant service + LLM endpoint | Identity from SSO; planner via LLM |
+| `src/poc/insight` + offline rules planner (no LLM, no API key) | Assistant service + LLM endpoint | Identity from SSO; LLM replaces the rules planner behind the same interface – [question flow](#how-a-question-becomes-sql) |
 | `access_policy.yml` | UC groups, row filters, tags, metric-view grants | Same rules |
 | `make`, Docker, GitHub Actions | Asset Bundles, Terraform, GitHub Actions | Environments dev/test/prod |
+
+### How a question becomes SQL
+
+![AI question flow](diagrams/05_ai_question_flow.png)
+
+The planner is the only step that changes between the PoC and the target. **In the PoC it is a rule-based
+planner** (`CPG_PLANNER=rules`, the default in the Makefile, Docker and CI): keyword rules, no LLM and no API key.
+In the target an LLM takes its place and returns the same plan JSON; it sees the question and the metric
+catalogue, never data. A Claude planner is in the code (`CPG_PLANNER=anthropic` + `ANTHROPIC_API_KEY`) but has not
+been run. Everything after the planner – validation, access policy, compiler, template answer, audit – is the same
+in both and is tested, including with a deliberately malicious planner. See [ADR-003](../adr/ADR-003-ai-grounding.md).
 
 ## 6. Phased migration
 
@@ -325,7 +336,7 @@ The on-prem warehouse is never switched off before its numbers have been reprodu
 | **Privacy** | No PII; LLM never sees rows | §3 ([A-17](../requirements/assumptions_register.md#a-17)) | Planner receives catalogue only; audit log |
 | **Observability** | Every batch measured; alerts on anomalies, freshness, failures | DQ batch summary, anomaly test, UC system tables, Azure Monitor | `slv_dq_batch_summary`; warning fires on October incident |
 | **Lineage** | Any number traceable to its source file | UC column lineage; `_source_file` on every row; dbt graph | dbt docs lineage from sources to exposures |
-| **Data quality** | Bad rows held with a reason; contracts enforced | Quality rules in silver; dbt tests; contract on fact | 61 dbt tests; quarantine by reason |
+| **Data quality** | Bad rows held with a reason; contracts enforced | Quality rules in silver; dbt tests; contract on fact | 73 dbt tests; quarantine by reason |
 | **Cost** | Within an agreed monthly budget per environment | §8 | – |
 | **Recovery** | RPO 24 h / RTO 4 h for curated data (proposed) | Append-only landing and bronze → replay; Delta time travel 30 days; IaC rebuilds the workspace; storage with zone redundancy | `make all` rebuilds everything from landing |
 

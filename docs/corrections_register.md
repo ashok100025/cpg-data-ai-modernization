@@ -254,13 +254,23 @@ verifying its own work, inside the review process Ashok set (explain → agree �
 - **Fix:** "Quick start for reviewers" at the top of Run it: three paths (Docker only, Mac/Linux, Windows via WSL) with clone commands, prerequisites, an expected-output table and troubleshooting; new `make demo` running every step in the right order; Docker image runs `make demo`; reminder to give reviewers access to the private repo before submission
 - **Why it mattered:** The brief requires that another engineer can run the PoC and reproduce its outputs – a private repo, a missing `make` on Windows or an unclear order would have stopped them
 
+### #48 · Block 8 · The video script implied an LLM answered the demo questions
+- **Found by:** **Ashok** – "which LLM is this? I did not use any, did not give any API key. Where is the LLM diagram?"
+- **Fix:** Script and teleprompter now say the PoC planner is a rule-based stand-in and an LLM replaces it in the target; new [question-flow diagram](architecture/diagrams/05_ai_question_flow.png) in the architecture doc, ADR-003 and README; diagram 04 labels the planner "rules planner (no LLM in PoC)"
+- **Why it mattered:** A reviewer who checked the code would have found no LLM call behind the demo – the claim would have cost credibility
+
+### #49 · Block 8 · Stale counts in the PoC diagram and three docs
+- **Found by:** AI self-check while editing diagram 04 for #48
+- **Fix:** 6 → 7 bronze views; 61 → 73 dbt tests and 56 → 65 Python tests in diagram 04, architecture.md, requirements_trace.md and cicd.md (Block 4's explanation keeps the counts of its time)
+- **Why it mattered:** Restatement (Block 7) added tests and a source; numbers a reviewer can check should match a run
+
 ## How to talk about this in the interview
 
 The brief asks to *"show how you used AI tools, reviewed their output, and changed decisions"*. The
 commit messages and the Coaching Moments sheet already record who found what, so describe it the same
 way:
 
-- **What Ashok found or decided himself** (#1, #2, #9, #10, #35–#43, #47): the timeline, the no-API-key constraint,
+- **What Ashok found or decided himself** (#1, #2, #9, #10, #35–#43, #47, #48): the timeline, the no-API-key constraint,
   stopping the AI and setting the review gates, keeping explanations, and the architecture review findings
   (missing PoC diagram, misleading daily-run diagram, unclear migration scope, durations without a sizing basis, the CEO question that led to the restatement mechanism and the daily version table).
 - **What Ashok's questions exposed** (#13, #14, #15, #22, #23): reviewer access, GUI behaviour, invisible SQL.
