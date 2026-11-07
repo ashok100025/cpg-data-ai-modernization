@@ -53,3 +53,11 @@ jobs:
         run: docker build -t cpg-data-ai-poc .
       - name: Run the whole PoC in the container
         run: docker run --rm cpg-data-ai-poc
+      - name: Step-by-step path - dbt docs reachable from the host
+        run: |
+          docker run -d --name cpg-demo -p 8080:8080 cpg-data-ai-poc sleep infinity
+          docker exec cpg-demo make all
+          docker exec -d cpg-demo make docs
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:8080/index.html && echo "docs reachable on host port 8080" && break; sleep 2; done
+          curl -sf -o /dev/null http://localhost:8080/index.html
+          docker rm -f cpg-demo

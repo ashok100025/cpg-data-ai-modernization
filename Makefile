@@ -2,8 +2,9 @@
 PY      ?= .venv/bin/python
 DBT     ?= .venv/bin/dbt
 DBTARGS  = --project-dir dbt --profiles-dir dbt
+DOCS_HOST ?= 127.0.0.1
 
-.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc methodology demo-restatement demo video-prep all clean
+.PHONY: setup data build forecast test demo-incremental inspect preview query sql ask ai-demo docs docs-generate docker-build docker-run schema-doc methodology demo-restatement demo demo-prep all clean
 
 setup:            ## create the virtualenv and install pinned dependencies
 	python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt
@@ -53,8 +54,8 @@ ai-demo:          ## scripted demo: answered, restricted, refused (unauthorized 
 docs-generate:    ## dbt documentation site incl. lineage graph -> dbt/target/index.html
 	$(DBT) docs generate $(DBTARGS)
 
-docs: docs-generate ## generate and open the dbt docs site on http://localhost:8080
-	$(DBT) docs serve $(DBTARGS) --port 8080
+docs: docs-generate ## generate and serve the dbt docs site on http://localhost:8080 (needs a built warehouse)
+	$(DBT) docs serve $(DBTARGS) --host $(DOCS_HOST) --port 8080
 
 schema-doc: docs-generate ## regenerate docs/models/physical_schema.md from dbt's manifest + catalog
 	$(PY) src/poc/build_schema_doc.py
@@ -71,8 +72,8 @@ docker-run:       ## run the whole PoC inside the container
 demo:             ## the whole demo in the right order (~35 s after setup)
 	$(MAKE) all && $(MAKE) ai-demo && $(MAKE) demo-incremental && $(MAKE) demo-restatement && $(MAKE) test && $(MAKE) inspect
 
-video-prep:       ## starting state for the video: clean history build + dbt docs; then run the live steps in the script
-	$(MAKE) clean && $(MAKE) all && $(MAKE) docs-generate && rm -rf outputs/audit && echo "Ready: history built. Live: demo-incremental -> demo-restatement -> ask"
+demo-prep:        ## reset to the end of demo step 2 (history built, docs generated) - for a retake from step 3
+	$(MAKE) clean && $(MAKE) all && $(MAKE) docs-generate && rm -rf outputs/audit && echo "Ready: history built. Continue with step 3 (make demo-incremental)"
 
 all: data build forecast test
 

@@ -240,6 +240,13 @@ within an agreed tolerance for **two closed months** – or every difference mus
 documented rule (for example, returns counted on the sale date instead of the processing date).
 Only then do reports move (Phase 2).
 
+**Daily comparison finds problems; the closed-month match is the sign-off.** During the parallel run both
+platforms are compared **every day**: row counts and net revenue by source, region and day, with a tolerance
+and an alert on any jump, so a wrong mapping or a dropped file shows up the next morning. Daily figures are not
+the gate, because a day keeps changing until the month closes (late files, returns, corrections, restatements),
+and two systems with different cut-off times often differ by day for timing reasons alone. A closed month has
+absorbed all of that, so a mismatch there is a real logic difference, and it is the figure Finance signs.
+
 ![Migration phases](diagrams/03_migration_phases.png)
 
 <details><summary>Mermaid source</summary>
@@ -270,7 +277,7 @@ gantt
 | Phase | Goal | Exit criteria |
 |---|---|---|
 | **P0 Foundation** (wk 1–4) | Landing zone, Unity Catalog, networking, IaC, CI/CD; discovery confirms [A-01](../requirements/assumptions_register.md#a-01)…[A-19](../requirements/assumptions_register.md#a-19) | Assumptions signed off or changed; dev/test/prod deployable from CI |
-| **P1 Coexist** (wk 5–14) | Ingest POS, e-commerce and masters; build gold and certified metrics; **run in parallel** with the nightly on-prem ETL | Monthly net revenue reconciles with the on-prem warehouse within an agreed tolerance for 2 closed months; DQ alerts live |
+| **P1 Coexist** (wk 5–14) | Ingest POS, e-commerce and masters; build gold and certified metrics; **run in parallel** with the nightly on-prem ETL; **daily comparison** of counts and net revenue with alerts | Monthly net revenue reconciles with the on-prem warehouse within an agreed tolerance for 2 closed months; DQ alerts live |
 | **P2 Move reporting** (wk 15–22) | Reports switch to metric views; duplicate metric definitions retired; on-prem report marts decommissioned | No report computes revenue outside the catalogue; usage moved |
 | **P3 AI and scale** (wk 21–32) | Forecast in production, assistant pilot with one business unit, optional signals **only if they prove value** (forecast error drops), more BUs; retire the warehouse | Pilot acceptance (refusal accuracy, user feedback), forecast value added vs baseline, warehouse switched off |
 

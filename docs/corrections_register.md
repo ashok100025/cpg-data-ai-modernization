@@ -264,13 +264,18 @@ verifying its own work, inside the review process Ashok set (explain → agree �
 - **Fix:** 6 → 7 bronze views; 61 → 73 dbt tests and 56 → 65 Python tests in diagram 04, architecture.md, requirements_trace.md and cicd.md (Block 4's explanation keeps the counts of its time)
 - **Why it mattered:** Restatement (Block 7) added tests and a source; numbers a reviewer can check should match a run
 
+### #50 · Block 8 · The migration gate did not say daily comparison also runs
+- **Found by:** **Ashok** – "why monthly report movement? why not daily?"
+- **Fix:** [architecture.md](architecture/architecture.md) section 6 explains daily comparison during the parallel run (finds problems next morning) vs the closed-month match (the sign-off gate, because a day keeps changing until close); Phase 1 table row and video line updated
+- **Why it mattered:** A reviewer reading only "two closed months" could conclude errors would surface a month late
+
 ## How to talk about this in the interview
 
 The brief asks to *"show how you used AI tools, reviewed their output, and changed decisions"*. The
 commit messages and the Coaching Moments sheet already record who found what, so describe it the same
 way:
 
-- **What Ashok found or decided himself** (#1, #2, #9, #10, #35–#43, #47, #48): the timeline, the no-API-key constraint,
+- **What Ashok found or decided himself** (#1, #2, #9, #10, #35–#43, #47, #48, #50): the timeline, the no-API-key constraint,
   stopping the AI and setting the review gates, keeping explanations, and the architecture review findings
   (missing PoC diagram, misleading daily-run diagram, unclear migration scope, durations without a sizing basis, the CEO question that led to the restatement mechanism and the daily version table).
 - **What Ashok's questions exposed** (#13, #14, #15, #22, #23): reviewer access, GUI behaviour, invisible SQL.
