@@ -34,7 +34,7 @@ brief to where it is met and the test or evidence that proves it.
 | # | Brief asks | Where | Proof |
 |---|---|---|---|
 | FR1 | Requirements trace from business questions to consumers | this document, section 1 | – |
-| FR2 | Sample data flow: ingest, quality rules, history, queryable curated model | `src/poc/generate_data.py`, `dbt/` | `make all` → 73 dbt tests; `make inspect` reconciliation |
+| FR2 | Sample data flow: ingest, quality rules, history, queryable curated model | `src/poc/generate_data.py`, `dbt/` | `make all` → 46 dbt data tests; `make inspect` reconciliation |
 | FR3 | Analytics or forecast from actual data with grain, assumptions, validation | `mart_sales_weekly`, `forecast.py`, `block_03` explanation | backtest WAPE 14.5% vs 18.8% baseline; `test_stored_backtest_used_only_data_before_each_origin` |
 | FR4 | AI insight uses approved, traceable results; unsupported / unauthorized prevented or flagged | `src/poc/insight/`, `policies/access_policy.yml` | `tests/insight_eval.yml` (19 cases), malicious-planner tests, audit log |
 | FR5 | Another engineer can run the PoC and reproduce outputs | `Makefile`, `Dockerfile`, README | CI `test` and `docker` jobs green; deterministic seed |

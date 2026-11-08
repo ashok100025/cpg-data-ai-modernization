@@ -26,11 +26,11 @@ tests carry over largely as-is once ported to the target platform.
 
 | # | Risk | Why it ranks here | Mitigation before handoff |
 |---|---|---|---|
-| 1 | **Assumptions [A-01](../requirements/assumptions_register.md#a-01)…[A-19](../requirements/assumptions_register.md#a-19) unconfirmed** – especially the revenue definition ([A-01](../requirements/assumptions_register.md#a-01)) and late window ([A-05](../requirements/assumptions_register.md#a-05)) | Every number depends on them | Confirm in P0 discovery; P1 reconciliation proves them |
-| 2 | **Reconciliation with the on-prem warehouse not yet done** | Business will not trust a new number that differs unexplained | WS7 parallel run with Finance sign-off before cut-over |
+| 1 | **Assumptions [A-01](../requirements/assumptions_register.md#a-01)…[A-20](../requirements/assumptions_register.md#a-20) unconfirmed** – especially the revenue definition ([A-01](../requirements/assumptions_register.md#a-01)) and late window ([A-05](../requirements/assumptions_register.md#a-05)) | Every number depends on them | Confirm in P0 discovery; P1 reconciliation proves them |
+| 2 | **Reports moved before the new numbers reconcile with the on-prem warehouse** | Business will not trust a new number that differs unexplained | WS7 parallel run with Finance sign-off before cut-over |
 | 3 | **AI assistant not validated with a real LLM or real users** | Planner quality and user trust unknown | Golden set on the real endpoint, red-team, one-BU pilot ([ADR-003](../adr/ADR-003-ai-grounding.md)) |
 | 4 | **Identity and access mapping not built** ([A-15](../requirements/assumptions_register.md#a-15)) | Policy is only as good as group membership | Map Entra ID groups → UC in P0; access review process |
 | 5 | **Forecast trained on synthetic data** | Real seasonality, promotions and stock-outs differ | Re-run backtest on real history; keep confidence labels |
 | 6 | **Scale untested** (230 k vs ~100–300 M lines/year) | Incremental design is right but unmeasured | Load test in the [ADR-001](../adr/ADR-001-lakehouse-platform.md) spike |
-| 7 | **UAE data residency open** ([A-14](../requirements/assumptions_register.md#a-14)) | Could force a design change | Legal review in P0 |
+| 7 | **Data residency for a second country** – UAE in the PoC data, which assumes India + UAE stores to test a second currency and time zone ([A-14](../requirements/assumptions_register.md#a-14)) | Could force a design change | Legal review in P0 |
 | 8 | **Knowledge concentration in a small pod** | [R-12](../governance/risks.md#r-12) | Seconds per workstream, explanations folder, CODEOWNERS |

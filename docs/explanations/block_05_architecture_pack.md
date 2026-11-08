@@ -105,7 +105,7 @@ video and local viewing). The two ER diagrams are in the model docs, also with P
 | 2 | Physical schema generated from dbt |
 | 3 | Cost as drivers, sizing approach and FinOps controls – no price figures |
 | 4 | RPO/RTO as proposed targets to confirm ([A-13](../requirements/assumptions_register.md#a-13)) |
-| 5 | Azure Central India; UAE residency open ([A-14](../requirements/assumptions_register.md#a-14)) |
+| 5 | Azure Central India; data residency for a second country open – UAE in the PoC data ([A-14](../requirements/assumptions_register.md#a-14)) |
 | 6 | Ingestion: ADF / Lakeflow Connect with self-hosted IR + Auto Loader |
 | 7 | Indicative phase durations, to confirm ([A-18](../requirements/assumptions_register.md#a-18)) |
 | 8 | Four ADRs |

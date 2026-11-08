@@ -269,13 +269,43 @@ verifying its own work, inside the review process Ashok set (explain → agree �
 - **Fix:** [architecture.md](architecture/architecture.md) section 6 explains daily comparison during the parallel run (finds problems next morning) vs the closed-month match (the sign-off gate, because a day keeps changing until close); Phase 1 table row and video line updated
 - **Why it mattered:** A reviewer reading only "two closed months" could conclude errors would surface a month late
 
+### #51 · Block 8 · The repo copy of the teleprompter page was stale
+- **Found by:** **Ashok** – "video line is not updated in teleprompter, only the show block is updated"
+- **Fix:** Re-saved the page to the repo and read it back from the folder after every save; each save now uses a new file name in the transfer area, because re-using one name delivered an older copy
+- **Why it mattered:** The published page and the repo file disagreed – a reviewer opening the repo would have seen the old wording
+
+### #52 · Block 8 · The video script was hard to read aloud
+- **Found by:** **Ashok** – "script has partial sentences … every sentence should be full and simple; I should pause on full stops and commas only"
+- **Fix:** Every spoken line in the script and the teleprompter rewritten as full, simple sentences – no dashes, brackets, colons or fragments; numbers written as spoken
+- **Why it mattered:** Notes written for reading do not work as speech; the recording kept breaking at the fragments
+
+### #53 · Block 8 · Demo commands had no explanations and were not organised for other engineers
+- **Found by:** **Ashok** – asked for the demo in sub-sections incl. building the history, the same steps in the README for other engineers, the same commands in all three files, and an explanatory comment for every command
+- **Fix:** README "How to run the demo" (step 0 PC setup per path, steps 1–7); the script and teleprompter use the same step names; every command has a comment line above it, identical in README, script and teleprompter – checked by a script (14 commands, 14 comments, all identical); step 0 commands commented too
+- **Why it mattered:** A reviewer must be able to reproduce the demo without the video, and understand each command before running it
+
+### #54 · Block 8 · The teleprompter lost the comment on `make clean`
+- **Found by:** AI self-check while rebuilding segment 3
+- **Fix:** A one-sentence insert after `make clean` had attached that command's comment to the new sentence; restored, and the 14 commands and comments re-checked as identical in README, script and teleprompter
+- **Why it mattered:** The comment for every command was a stated requirement; a small edit silently broke it
+
+### #55 · Block 8 · "73 dbt tests" was the count of all passing dbt nodes, not tests
+- **Found by:** **Ashok** – "you said 73 tests passed, but it was only 62 passed and 3 skipped"
+- **Fix:** dbt's `PASS=73` counts 23 models + 46 data tests + 3 seeds + 1 snapshot. The script and teleprompter now say forty-six data tests, and that 62 Python tests pass with 3 skipped until the restatement; the README explains both counts; diagram 04, architecture.md, cicd.md and requirements_trace.md say 46 dbt data tests (#49 had wrongly changed them to 73)
+- **Why it mattered:** A reviewer comparing the video with the terminal would see numbers that do not match
+
+### #56 · Block 8 · Readiness still said "UAE data residency open" with no context, and "reconciliation not yet done"
+- **Found by:** **Ashok** – "why are you talking about UAE in readiness, it will confuse the interviewer?" and "this is a PoC, why will I do reconciliation?"
+- **Fix:** [readiness.md](delivery/readiness.md) risk 7 now reads "data residency for a second country – UAE in the PoC data", as in R-14 and A-14; the same wording in architecture.md, the Block 5 explanation and decision D16. Risk 2 now states the risk itself (reports moved before the numbers reconcile), not missing PoC work; risk 1 counts A-01…A-20
+- **Why it mattered:** The readiness table is on screen in the video; an unexplained country or "not done" wording invites the wrong question
+
 ## How to talk about this in the interview
 
 The brief asks to *"show how you used AI tools, reviewed their output, and changed decisions"*. The
 commit messages and the Coaching Moments sheet already record who found what, so describe it the same
 way:
 
-- **What Ashok found or decided himself** (#1, #2, #9, #10, #35–#43, #47, #48, #50): the timeline, the no-API-key constraint,
+- **What Ashok found or decided himself** (#1, #2, #9, #10, #35–#43, #47, #48, #50–#53, #55, #56): the timeline, the no-API-key constraint,
   stopping the AI and setting the review gates, keeping explanations, and the architecture review findings
   (missing PoC diagram, misleading daily-run diagram, unclear migration scope, durations without a sizing basis, the CEO question that led to the restatement mechanism and the daily version table).
 - **What Ashok's questions exposed** (#13, #14, #15, #22, #23): reviewer access, GUI behaviour, invisible SQL.

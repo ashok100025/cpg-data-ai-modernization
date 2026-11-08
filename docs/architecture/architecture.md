@@ -107,7 +107,7 @@ flowchart TB
 | Identity | Entra ID SSO; SCIM-synced groups → Unity Catalog groups ([A-15](../requirements/assumptions_register.md#a-15)); service principals for jobs and CI; no personal tokens in pipelines |
 | Authorisation | UC grants by layer (engineers write bronze/silver; only pipelines write gold); consumers read **metric views and gold only**; row filter on region for regional roles; sensitivity tags on commercially sensitive measures ([A-16](../requirements/assumptions_register.md#a-16)) |
 | Secrets | Azure Key Vault-backed secret scopes; nothing in code or config |
-| Data | Encryption at rest (platform keys; customer-managed keys if required); TLS in transit; no PII in scope ([A-17](../requirements/assumptions_register.md#a-17)); UAE residency open ([A-14](../requirements/assumptions_register.md#a-14)) |
+| Data | Encryption at rest (platform keys; customer-managed keys if required); TLS in transit; no PII in scope ([A-17](../requirements/assumptions_register.md#a-17)); data residency for a second country open – UAE in the PoC data ([A-14](../requirements/assumptions_register.md#a-14)) |
 | AI | LLM receives the question and catalogue metadata only – **never rows**; enterprise endpoint with no training on prompts; every request audited; refusals by deterministic rules |
 | Change | All changes through pull requests and CI gates; production deploys by service principal only |
 
@@ -189,7 +189,7 @@ flowchart LR
     MART
   end
 
-  NOTE["Run with make all, Docker or GitHub Actions CI<br/>Guarded by 73 dbt tests + 65 Python tests incl. the AI golden set<br/>Inspect with make inspect / preview / query / sql / docs"]
+  NOTE["Run with make all, Docker or GitHub Actions CI<br/>Guarded by 46 dbt data tests + 65 Python tests incl. the AI golden set<br/>Inspect with make inspect / preview / query / sql / docs"]
   style NOTE fill:#fff8dc,stroke:#c9b458
 ```
 </details>
@@ -343,7 +343,7 @@ The on-prem warehouse is never switched off before its numbers have been reprodu
 | **Privacy** | No PII; LLM never sees rows | §3 ([A-17](../requirements/assumptions_register.md#a-17)) | Planner receives catalogue only; audit log |
 | **Observability** | Every batch measured; alerts on anomalies, freshness, failures | DQ batch summary, anomaly test, UC system tables, Azure Monitor | `slv_dq_batch_summary`; warning fires on October incident |
 | **Lineage** | Any number traceable to its source file | UC column lineage; `_source_file` on every row; dbt graph | dbt docs lineage from sources to exposures |
-| **Data quality** | Bad rows held with a reason; contracts enforced | Quality rules in silver; dbt tests; contract on fact | 73 dbt tests; quarantine by reason |
+| **Data quality** | Bad rows held with a reason; contracts enforced | Quality rules in silver; dbt tests; contract on fact | 46 dbt data tests; quarantine by reason |
 | **Cost** | Within an agreed monthly budget per environment | §8 | – |
 | **Recovery** | RPO 24 h / RTO 4 h for curated data (proposed) | Append-only landing and bronze → replay; Delta time travel 30 days; IaC rebuilds the workspace; storage with zone redundancy | `make all` rebuilds everything from landing |
 

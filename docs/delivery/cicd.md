@@ -26,7 +26,7 @@ to prod – nothing is rebuilt between environments.
 
 | Stage | Gate | Exists in PoC? |
 |---|---|---|
-| Pull request | `make all`: dbt build (73 tests + enforced contract), forecast, 65 Python tests incl. AI golden set; Docker build and run, plus the README step-by-step path (dbt docs reachable from the host) | ✅ GitHub Actions |
+| Pull request | `make all`: dbt build (46 data tests + enforced contract), forecast, 65 Python tests incl. AI golden set; Docker build and run, plus the README step-by-step path (dbt docs reachable from the host) | ✅ GitHub Actions |
 | Pull request | CODEOWNERS approval for metrics, access policy, contracts, gold, workflows | ✅ `.github/CODEOWNERS` |
 | Pull request | dbt **state comparison**: only modified models and their children rebuilt and tested (`state:modified+`) | Prod |
 | Test | Full build on real data; **data diff** of gold vs prod (row counts, totals per metric/month) within tolerance | Prod |

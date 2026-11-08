@@ -137,5 +137,5 @@ commit pushed on your approval.
 
 ## 6. For submission (Block 9)
 
-- [ ] **Give the reviewers access to the private GitHub repo** (Settings → Collaborators), or make it public – otherwise nobody can clone it.
+- [x] **Give the reviewers access to the private GitHub repo** (Settings → Collaborators), or make it public – otherwise nobody can clone it. – done 2026-11-08: the repo is public
 - [ ] Check the latest CI run is green on the submitted commit.
